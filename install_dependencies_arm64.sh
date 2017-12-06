@@ -2,8 +2,8 @@
 
 #install required cross compile tool-chain
 sudo apt-get update
-sudo apt-get install gcc-4.8-arm-linux-gnueabihf
-sudo apt-get install g++-4.8-arm-linux-gnueabihf
+sudo apt-get install gcc-4.8-aarch64-linux-gnu
+sudo apt-get install g++-4.8-aarch64-linux-gnu
 
 mkdir ./dependencies
 cd ./dependencies

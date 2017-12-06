@@ -18,7 +18,6 @@ chmod 777 version.sh
 chmod 777 autogen.sh
 ./autogen.sh
 ./configure --host=arm-linux-gnueabihf CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 --disable-shared --enable-static CFLAGS=-fPIC CPPFLAGS=-fPIC
-
 make -j 4
 sudo make install
 sudo ldconfig
