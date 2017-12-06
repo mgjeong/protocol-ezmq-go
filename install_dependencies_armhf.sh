@@ -9,7 +9,7 @@ mkdir ./dependencies
 cd ./dependencies
 DEP_ROOT=$(pwd)
 
-#Clone, build and install ZeroMQ library for arm64 architecture
+#Clone, build and install ZeroMQ library for armhf architecture
 git clone https://github.com/zeromq/libzmq.git
 cd libzmq
 git checkout v4.2.2
@@ -17,13 +17,13 @@ chmod 777 version.sh
 ./version.sh
 chmod 777 autogen.sh
 ./autogen.sh
-./configure --host=aarch64-unknown-linux-gnu CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8
+./configure --host=arm-linux-gnueabihf CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 --disable-shared --enable-static CFLAGS=-fPIC CPPFLAGS=-fPIC
 
 make -j 4
 sudo make install
 sudo ldconfig
 
-#build, install protobuf library for arm64 architecture
+#build, install protobuf library for armhf architecture
 FILENAME="protobuf-cpp-3.4.0.tar.gz"
 cd $DEP_ROOT
 if [ -e"$FILENAME" ] ; then
@@ -36,7 +36,7 @@ tar -xvf protobuf-cpp-3.4.0.tar.gz
 cd protobuf-3.4.0/
 chmod 777 autogen.sh
 ./autogen.sh
-./configure --host=aarch64-unknown-linux-gnu CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8
+./configure --host=arm-linux-gnueabihf CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8
 make -j 4
 sudo make install
 #handle error

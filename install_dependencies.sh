@@ -1,10 +1,9 @@
 #!/bin/bash
-CPP_ROOT=$(pwd)
-FILENAME="protobuf-cpp-3.4.0.tar.gz"
 mkdir ./dependencies
 cd ./dependencies
-
 DEP_ROOT=$(pwd)
+
+#Clone, build and install ZeroMQ library
 git clone https://github.com/zeromq/libzmq.git
 cd libzmq
 git checkout v4.2.2
@@ -13,11 +12,12 @@ chmod 777 version.sh
 chmod 777 autogen.sh
 ./autogen.sh
 ./configure
-
 make -j 4
 sudo make install
 sudo ldconfig
 
+#build, install protobuf library
+FILENAME="protobuf-cpp-3.4.0.tar.gz"
 cd $DEP_ROOT
 if [ -e"$FILENAME" ] ; then
     echo "file exist"
