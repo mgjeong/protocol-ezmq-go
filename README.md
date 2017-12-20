@@ -39,7 +39,10 @@ Built ezMQ
 3.  On successful running it will show following logs:
 
 ```
-Initialize API [result]: 0
+2017-12-21T01:22:15.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
+[Initialize] Error code is: 0
+Enter 1 for General Event testing
+Enter 2 for Topic Based delivery
 ```
 **Follow the instructions on the screen.**
 
@@ -50,7 +53,10 @@ Initialize API [result]: 0
 3.  On successful running it will show following logs:
 
 ```
-Initialize API [result]: 0
+2017-12-21T01:23:25.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
+[Initialize] Error code is: 0
+Enter 1 for General Event testing
+Enter 2 for Topic Based delivery
 ```
 **Follow the instructions on the screen.**
 
@@ -60,12 +66,14 @@ Initialize API [result]: 0
 2. Refer ezMQ sample applications to use ezMQ SDK APIs. **[~/EZMQ/go/samples]**
 
 ## Generating godoc for ezMQ  SDK 
-1. After installing the ezMQ SDK, godoc can be generated using following command: </br>
-   $ godoc -html go/ezmq  > ezmq.html
-2. Open the ezmq.html in web browser. </br>
+1. Goto: **~/${GOPATH}/src/go/**
+2.  Use following command to generate godoc: </br>
+   $ godoc -html go/ezmq  > ezmq.html</br>
+     **Note:** godoc can be generated only after building and installing ezMQ.
+3. Open the ezmq.html in web browser. </br>
     **Note:** Refer [guide]( https://godoc.org/golang.org/x/tools/cmd/godoc) for trying more options.
 
 ## Running static analyzer for ezMQ SDK
-1. Goto: ~/${GOPATH}/src/go/
+1. Goto: **~/${GOPATH}/src/go/**
 2. Run the below command:</br>
    $ go tool vet -all .
