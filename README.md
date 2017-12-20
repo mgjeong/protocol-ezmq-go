@@ -28,7 +28,7 @@ Following is the architecture of ezMQ client library: </br> </br>
 2. ./build.sh <options></br></br>
 **Notes:** </br>
 (i) For getting help about script: **$ ./build.sh --help**</br>
-(ii)Script needs sudo permission for installing zeroMQ and protobuf libraries. In future it will be removed by installing those libraries in ezMQ sdk.</br>
+(ii)Currently, Script needs sudo permission for installing zeroMQ and protobuf libraries. In future need for sudo will be removed by installing those libraries in ezMQ sdk.</br>
 (iii)While doing cross compilation, permission denied error may come.</br>
       **For example:** The below error while building for armhf:</br>
       `go install runtime/internal/sys: mkdir /usr/local/go/pkg/linux_arm: permission denied`</br>
