@@ -1,6 +1,6 @@
-# ezMQ CPP Client SDK
+# ezMQ GO Client SDK
 
-protocol-ezmq-cpp library provides a standard messaging interface over various data streaming 
+protocol-ezmq-go library provides a standard messaging interface over various data streaming 
 and serialization / deserialization middlewares along with some added functionalities.</br>
 Following is the architecture of ezMQ client library: </br> </br>
 ![ezMQ Architecture](doc/images/ezMQ_architecture_0.1.png?raw=true "ezMQ Arch")
