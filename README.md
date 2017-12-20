@@ -56,11 +56,11 @@ Initialize API [result]: 0
 
 ## ezMQ Usage guide [For micro-services]
 1. The micro-service which wants to use EZMQ GO SDK has to import ezmq package:
-    - import go/ezmq
+    `import go/ezmq`
 2. Refer EZMQ sample applications to use EZMQ SDK APIs. **[~/EZMQ/go/samples]**
 
 ## Generating godoc for ezMQ  SDK 
-1. After installing the EZMQ go SDK, godoc can be generated using following command: </br>
+1. After installing the ezMQ SDK, godoc can be generated using following command: </br>
    $ godoc -html go/ezmq  > ezmq.html
 2. Open the ezmq.html in web browser. </br>
     **Note:** Refer [guide]( https://godoc.org/golang.org/x/tools/cmd/godoc) for trying more options.
