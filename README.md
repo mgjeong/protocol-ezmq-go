@@ -67,5 +67,5 @@ Initialize API [result]: 0
 
 ## Running static analyzer for ezMQ SDK
 1. Goto: ~/${GOPATH}/src/go/
-2. Run the below command:
+2. Run the below command:</br>
    $ go tool vet -all .
