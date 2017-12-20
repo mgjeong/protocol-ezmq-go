@@ -34,7 +34,7 @@ Following is the architecture of ezMQ client library: </br> </br>
 Built ezMQ
 ### Run the subscriber sample application
 
-1. Goto: ~/${GOPATH}/src/go/linux/samples/
+1. Goto: ~/${GOPATH}/src/go/samples/
 2. ./subscriber
 3.  On successful running it will show following logs:
 
@@ -45,7 +45,7 @@ Initialize API [result]: 0
 
 ###  Run the publisher sample application
 
-1. Goto: ~/${GOPATH}/src/go/linux/samples/
+1. Goto: ~/${GOPATH}/src/go/samples/
 2. ./subscriber
 3.  On successful running it will show following logs:
 
@@ -54,3 +54,18 @@ Initialize API [result]: 0
 ```
 **Follow the instructions on the screen.**
 
+## ezMQ Usage guide [For micro-services]
+1. The micro-service which wants to use EZMQ GO SDK has to import ezmq package:
+    - import go/ezmq
+2. Refer EZMQ sample applications to use EZMQ SDK APIs. [~/EZMQ/go/samples]
+
+## Generating godoc for ezMQ  SDK 
+1. After installing the EZMQ go SDK, godoc can be generated using following command:
+   $ godoc -html go/ezmq  > ezmq.html
+2. Open the ezmq.html in web browser.
+    **Note:** Refer [guide]( https://godoc.org/golang.org/x/tools/cmd/godoc) for trying more options.
+
+## Running static analyzer for ezMQ SDK
+1. Goto: ~/${GOPATH}/src/go/
+2. Run the below command:
+   $ go tool vet -all .
