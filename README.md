@@ -20,11 +20,11 @@ Following is the architecture of ezMQ client library: </br> </br>
 
 ## How to build ezMQ SDK and samples
 ### pre-requisites
-1. Scons should be installed on linux machine. </br>
-   $ sudo apt-get install scons
+1. go 1.9 should be installed on linux machine. </br>
+   **Refer:** https://golang.org/doc/install
 
 ### Build Instructions
-1. Goto: ~/protocol-ezmq-cpp/
+1. Goto: ~/protocol-ezmq-go/
 2. ./build.sh </br>
    **Note:** For getting help about script: **$ ./build.sh --help**
 
@@ -34,10 +34,9 @@ Following is the architecture of ezMQ client library: </br> </br>
 Built ezMQ
 ### Run the subscriber sample application
 
-1. Goto: ~/protocol-ezmq-cpp/out/linux/{ARCH}/{MODE}/samples/
-2. export LD_LIBRARY_PATH=../
-3. ./subscriber
-4.  On successful running it will show following logs:
+1. Goto: ~/${GOPATH}/src/go/linux/samples/
+2. ./subscriber
+3.  On successful running it will show following logs:
 
 ```
 Initialize API [result]: 0
@@ -46,28 +45,12 @@ Initialize API [result]: 0
 
 ###  Run the publisher sample application
 
-1. Goto: ~/protocol-ezmq-cpp/out/linux/{ARCH}/{MODE}/samples/
-2. export LD_LIBRARY_PATH=../
-3. ./publisher
-4. On successful running it will show following logs:
+1. Goto: ~/${GOPATH}/src/go/linux/samples/
+2. ./subscriber
+3.  On successful running it will show following logs:
 
 ```
 Initialize API [result]: 0
 ```
 **Follow the instructions on the screen.**
-
-##  Unit test and Code coverage report generation
-
-### Pre-requisite
-1. Gcovr tool </br>
-   **Refer:** http://gcovr.com/guide.html#installation
-
-### Report generation guide
-1. Goto: ~/protocol-ezmq-cpp/</br>
-2. Run the script [generate_report.sh]:</br>
-   $ ./generate_report.sh </br>
-     **Note:** For getting help about script: **$ ./generate_report.sh --help**
-3. On success, it will generate following reports in [~/protocol-ezmq-cpp/] : </br>
-   (i)  UnitTestReport </br>
-   (ii) CoverageReport </br>
 
