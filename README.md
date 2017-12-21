@@ -1,4 +1,4 @@
-# Ezmq GO Client Library
+# ezmq GO Client Library
 
 protocol-ezmq-go library provides a standard messaging interface over various data streaming 
 and serialization / deserialization middlewares along with some added functionalities.</br>
