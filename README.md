@@ -18,7 +18,7 @@ Following is the architecture of ezMQ client library: </br> </br>
 * Clustering Support.
 </br></br>
 
-## How to build ezMQ SDK and samples
+## How to build ezmq library and samples
 ### pre-requisites
 1. go 1.9 should be installed on linux machine. </br>
    **Refer:** https://golang.org/doc/install
@@ -28,7 +28,7 @@ Following is the architecture of ezMQ client library: </br> </br>
 2. ./build.sh <options></br></br>
 **Notes:** </br>
 (i) For getting help about script: **$ ./build.sh --help**</br>
-(ii)Currently, Script needs sudo permission for installing zeroMQ and protobuf libraries. In future need for sudo will be removed by installing those libraries in ezMQ sdk.</br>
+(ii)Currently, Script needs sudo permission for installing zeroMQ and protobuf libraries. In future need for sudo will be removed by installing those libraries in ezmq library.</br>
 (iii)While doing cross compilation, permission denied error may come.</br>
       **For example:** The below error while building for armhf:</br>
       `go install runtime/internal/sys: mkdir /usr/local/go/pkg/linux_arm: permission denied`</br>
@@ -36,10 +36,10 @@ Following is the architecture of ezMQ client library: </br> </br>
        - sudo mkdir /usr/local/go/pkg/linux_arm/</br>
        - sudo chmod 777 /usr/local/go/pkg/linux_arm/</br>
 
-## How to run ezMQ samples
+## How to run ezmq samples
 
 ### pre-requisites
-Built ezMQ
+Built ezmq
 ### Run the subscriber sample application
 
 1. Goto: ~/${GOPATH}/src/go/samples/
@@ -68,20 +68,20 @@ Enter 2 for Topic Based delivery
 ```
 **Follow the instructions on the screen.**
 
-## ezMQ Usage guide [For micro-services]
-1. The micro-service which wants to use ezMQ GO SDK has to import ezmq package:
+## ezmq Usage guide [For micro-services]
+1. The micro-service which wants to use ezmq GO library has to import ezmq package:
     `import go/ezmq`
-2. Refer ezMQ sample applications to use ezMQ SDK APIs. **[~/EZMQ/go/samples]**
+2. Refer ezmq sample applications to use ezmq library APIs. **[~/EZMQ/go/samples]**
 
-## Generating godoc for ezMQ  SDK 
+## Generating godoc for ezmq library 
 1. Goto: **~/${GOPATH}/src/go/**
 2.  Use following command to generate godoc: </br>
    $ godoc -html go/ezmq  > ezmq.html</br>
-     **Note:** godoc can be generated only after building and installing ezMQ.
+     **Note:** godoc can be generated only after building and installing ezmq.
 3. Open the ezmq.html in web browser. </br>
     **Note:** Refer [guide]( https://godoc.org/golang.org/x/tools/cmd/godoc) for trying more options.
 
-## Running static analyzer for ezMQ SDK
+## Running static analyzer for ezmq library
 1. Goto: **~/${GOPATH}/src/go/**
 2. Run the below command:</br>
    $ go tool vet -all .
