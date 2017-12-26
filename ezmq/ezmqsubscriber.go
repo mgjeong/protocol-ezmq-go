@@ -6,11 +6,14 @@ import (
 	"go.uber.org/zap"
 
 	List "container/list"
+	"math/rand"
 	"strconv"
+	"time"
 )
 
 // Address prefix to bind subscriber.
 const SUB_TCP_PREFIX = "tcp://"
+const INPROC_PREFIX = "inproc://shutdown-"
 
 // Callback to get all the subscribed events.
 type EZMQSubCB func(event Event)
@@ -25,8 +28,12 @@ type EZMQSubscriber struct {
 	subCallback      EZMQSubCB
 	subTopicCallback EZMQSubTopicCB
 
-	subscriber *zmq.Socket
-	context    *zmq.Context
+	context        *zmq.Context
+	subscriber     *zmq.Socket
+	shutdownServer *zmq.Socket
+	shutdownClient *zmq.Socket
+	poller         *zmq.Poller
+	shutdownChan   chan string
 
 	isReceiverStarted bool
 }
@@ -43,8 +50,13 @@ func GetEZMQSubscriber(ip string, port int, subCallback EZMQSubCB, subTopicCallb
 	InitLogger()
 	if nil == instance.context {
 		logger.Error("Context is null")
+		return nil
 	}
 	instance.subscriber = nil
+	instance.shutdownServer = nil
+	instance.shutdownClient = nil
+	instance.poller = nil
+	instance.shutdownChan = nil
 	instance.isReceiverStarted = false
 	return instance
 }
@@ -55,38 +67,56 @@ func receive(subInstance *EZMQSubscriber) {
 	var err error
 	var more bool
 	var topic string
+	var sockets []zmq.Polled
+	var socket zmq.Polled
+	var soc *zmq.Socket
+	var index int
+	for {
+		sockets, err = subInstance.poller.Poll(-1)
+		if err == nil {
+			for index, socket = range sockets {
+				switch soc = socket.Socket; soc {
+				case subInstance.subscriber:
+					if nil == subInstance.subscriber {
+						logger.Error("subscriber is null", zap.Int("Index", index))
+						break
+					}
+					data, err = subInstance.subscriber.RecvBytes(0)
+					if err != nil {
+						break
+					}
+					more, err = subInstance.subscriber.GetRcvmore()
+					if err != nil {
+						break
+					}
+					if more {
+						topic = string(data[:])
+						data, err = subInstance.subscriber.RecvBytes(0)
+					}
 
-	for subInstance.isReceiverStarted {
-		if nil == subInstance.subscriber {
-			logger.Error("subscriber or poller is null")
-			break
-		}
-		data, err = subInstance.subscriber.RecvBytes(0)
-		if err != nil {
-			break
-		}
-		more, err = subInstance.subscriber.GetRcvmore()
-		if err != nil {
-			break
-		}
-		if more {
-			topic = string(data[:])
-			data, err = subInstance.subscriber.RecvBytes(0)
-		}
+					//change byte array to Event
+					err := proto.Unmarshal(data, &event)
+					if nil != err {
+						logger.Error("Error in unmarshalling data")
+					}
 
-		//change byte array to Event
-		err := proto.Unmarshal(data, &event)
-		if nil != err {
-			logger.Error("Error in unmarshalling data")
-		}
-
-		if more {
-			subInstance.subTopicCallback(topic, event)
-		} else {
-			subInstance.subCallback(event)
+					if more {
+						subInstance.subTopicCallback(topic, event)
+					} else {
+						subInstance.subCallback(event)
+					}
+				case subInstance.shutdownClient:
+					logger.Debug("Received shut down request")
+					goto End
+				}
+			}
 		}
 	}
-	logger.Debug("Received the shut down request")
+End:
+	if nil != subInstance.shutdownChan {
+		logger.Debug("Go routine stopped: signaling channel")
+		subInstance.shutdownChan <- "shutdown"
+	}
 }
 
 // Starts SUB instance.
@@ -96,20 +126,55 @@ func (subInstance *EZMQSubscriber) Start() EZMQErrorCode {
 		return EZMQ_ERROR
 	}
 
+	var err error
+	var address = getInProcUniqueAddress()
+	if nil == subInstance.shutdownServer {
+		subInstance.shutdownServer, err = zmq.NewSocket(zmq.PAIR)
+		if nil != err {
+			logger.Error("shutdownServer Socket creation failed")
+			return EZMQ_ERROR
+		}
+		err = subInstance.shutdownServer.Bind(address)
+		if nil != err {
+			logger.Error("Error while binding shutdownServer")
+			subInstance.shutdownServer = nil
+			return EZMQ_ERROR
+		}
+	}
+
+	if nil == subInstance.shutdownClient {
+		subInstance.shutdownClient, err = zmq.NewSocket(zmq.PAIR)
+		if nil != err {
+			logger.Error("shutdownClient Socket creation failed")
+			return EZMQ_ERROR
+		}
+		err = subInstance.shutdownClient.Connect(address)
+		if nil != err {
+			logger.Error("shutdownClient Socket connect failed")
+			return EZMQ_ERROR
+		}
+		logger.Debug("shutdownClient subscriber", zap.String("Address", address))
+	}
+
 	if nil == subInstance.subscriber {
-		var err error
 		subInstance.subscriber, err = zmq.NewSocket(zmq.SUB)
 		if nil != err {
 			logger.Error("Subscriber Socket creation failed")
 			return EZMQ_ERROR
 		}
-		var address string = getSubSocketAddress(subInstance.ip, subInstance.port)
+		address = getSubSocketAddress(subInstance.ip, subInstance.port)
 		err = subInstance.subscriber.Connect(address)
 		if nil != err {
 			logger.Error("Subscriber Socket connect failed")
 			return EZMQ_ERROR
 		}
 		logger.Debug("Starting subscriber", zap.String("Address", address))
+	}
+
+	if nil == subInstance.poller {
+		subInstance.poller = zmq.NewPoller()
+		subInstance.poller.Add(subInstance.subscriber, zmq.POLLIN)
+		subInstance.poller.Add(subInstance.shutdownClient, zmq.POLLIN)
 	}
 
 	//call a go routine [new thread] for receiver
@@ -226,14 +291,60 @@ func (subInstance *EZMQSubscriber) UnSubscribeForTopicList(topicList List.List) 
 
 // Stops SUB instance.
 func (subInstance *EZMQSubscriber) Stop() EZMQErrorCode {
-	if nil != subInstance.subscriber {
-		err := subInstance.subscriber.Close()
+	if nil != subInstance.shutdownServer && subInstance.isReceiverStarted == true {
+		subInstance.shutdownChan = make(chan string)
+		timeout := make(chan bool, 1)
+		go func() {
+			time.Sleep(1 * time.Second)
+			timeout <- true
+		}()
+		result, err := subInstance.shutdownServer.Send("shutdown", 0)
 		if nil != err {
-			logger.Error("Error while stopping subscriber")
+			logger.Error("Error while sending event on shutdownServer", zap.Int("result: ", result))
+		} else {
+			select {
+			case <-subInstance.shutdownChan:
+				logger.Debug("Received success shutdown signal")
+			case <-timeout:
+				logger.Debug("Timeout occured for shutdown socket")
+			}
+		}
+	}
+
+	if nil != subInstance.poller {
+		subInstance.poller.RemoveBySocket(subInstance.subscriber)
+		subInstance.poller.RemoveBySocket(subInstance.shutdownClient)
+	}
+
+	if nil != subInstance.shutdownClient {
+		err := subInstance.shutdownClient.Close()
+		if nil != err {
+			logger.Error("Error while closing shutdownClient socket")
 			return EZMQ_ERROR
 		}
 	}
+
+	if nil != subInstance.shutdownServer {
+		err := subInstance.shutdownServer.Close()
+		if nil != err {
+			logger.Error("Error while closing shutdownServer socket")
+			return EZMQ_ERROR
+		}
+	}
+
+	if nil != subInstance.subscriber {
+		err := subInstance.subscriber.Close()
+		if nil != err {
+			logger.Error("Error while closing subscriber")
+			return EZMQ_ERROR
+		}
+	}
+
+	subInstance.poller = nil
+	subInstance.shutdownClient = nil
+	subInstance.shutdownServer = nil
 	subInstance.subscriber = nil
+	subInstance.shutdownChan = nil
 	subInstance.isReceiverStarted = false
 	logger.Debug("Subscriber stopped")
 	return EZMQ_OK
@@ -251,4 +362,8 @@ func (subInstance *EZMQSubscriber) GetPort() int {
 
 func getSubSocketAddress(ip string, port int) string {
 	return string(SUB_TCP_PREFIX) + ip + ":" + strconv.Itoa(port)
+}
+
+func getInProcUniqueAddress() string {
+	return string(INPROC_PREFIX) + strconv.Itoa(rand.Intn(10000000))
 }

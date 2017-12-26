@@ -165,6 +165,11 @@ build_x86_and_64() {
     cd ./src/go/samples
     go build -a subscriber.go
     go build -a publisher.go
+
+    # Copy unit test cases
+    cd ./../../../
+    cp -r unittests ./src/go
+    cd ./src/go/unittests
 }
 
 build_arm() {
@@ -308,24 +313,24 @@ process_cmd_args() {
                 EZMQ_TARGET_ARCH="${1#*=}";
                 if [ "x86" == ${EZMQ_TARGET_ARCH} ]; then
                     echo -e "Building for x86"
-                    build_x86_and_64; 
+                    build_x86_and_64;
                     echo -e "${GREEN}Build done${NO_COLOUR}"
                     exit 0;
                 elif [ "x86_64" == ${EZMQ_TARGET_ARCH} ]; then
                     echo -e "Building for x86_64"
-                    build_x86_and_64; 
-                    echo -e "${GREEN}Build done${NO_COLOUR}"		
+                    build_x86_and_64;
+                    echo -e "${GREEN}Build done${NO_COLOUR}"
                     exit 0;
                 elif [ "arm" == ${EZMQ_TARGET_ARCH} ]; then
-                    build_arm; 
+                    build_arm;
                     echo -e "${GREEN}Build done${NO_COLOUR}"
                     exit 0;
                 elif [ "arm64" == ${EZMQ_TARGET_ARCH} ]; then
-                    build_arm64; 
+                    build_arm64;
                     echo -e "${GREEN}Build done${NO_COLOUR}"
                     exit 0;
                 elif [ "armhf" == ${EZMQ_TARGET_ARCH} ]; then
-                    build_armhf; 
+                    build_armhf;
                     echo -e "${GREEN}Build done${NO_COLOUR}"
                     exit 0;
                 elif [ "armhf-qemu" == ${EZMQ_TARGET_ARCH} ]; then

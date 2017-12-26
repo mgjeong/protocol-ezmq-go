@@ -3,6 +3,9 @@ package ezmq
 
 import (
 	zmq "github.com/pebbe/zmq4"
+
+	"math/rand"
+	"time"
 )
 
 // Structure represents EZMQAPI
@@ -19,6 +22,7 @@ func GetInstance() *EZMQAPI {
 		instance = &EZMQAPI{}
 		instance.status = EZMQ_Constructed
 		InitLogger()
+		rand.Seed(time.Now().UnixNano())
 	}
 	return instance
 }
