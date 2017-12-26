@@ -5,6 +5,8 @@ import (
 
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -51,13 +53,29 @@ func getEvent() ezmq.Event {
 func main() {
 	var port int = 5562
 	var result ezmq.EZMQErrorCode
-	var publisher *ezmq.EZMQPublisher
+	var publisher *ezmq.EZMQPublisher = nil
+	var instance *ezmq.EZMQAPI = nil
 	startCB := func(code ezmq.EZMQErrorCode) { fmt.Printf("startCB") }
 	stopCB := func(code ezmq.EZMQErrorCode) { fmt.Printf("stopCB") }
 	errorCB := func(code ezmq.EZMQErrorCode) { fmt.Printf("errorCB") }
 
+	//Handler for ctrl+c
+	osSignal := make(chan os.Signal, 1)
+	signal.Notify(osSignal, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-osSignal
+		fmt.Println(sig)
+		if nil != publisher {
+			publisher.Stop()
+		}
+		if nil != instance {
+			instance.Terminate()
+		}
+		os.Exit(0)
+	}()
+
 	//get singleton instance
-	var instance *ezmq.EZMQAPI = ezmq.GetInstance()
+	instance = ezmq.GetInstance()
 
 	//Initilize the EZMQ SDK
 	result = instance.Initialize()
@@ -87,6 +105,7 @@ func main() {
 	result = publisher.Start()
 	if result != 0 {
 		fmt.Printf("\nError while starting publisher\n")
+		os.Exit(-1)
 	}
 	fmt.Printf("\n[Start] Error code is: %d", result)
 
