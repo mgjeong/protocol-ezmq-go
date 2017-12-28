@@ -22,6 +22,8 @@ import (
 
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func printEvent(event ezmq.Event) {
@@ -41,7 +43,24 @@ func main() {
 	var ip string = "localhost"
 	var port int = 5562
 	var result ezmq.EZMQErrorCode
+	var instance *ezmq.EZMQAPI
 	var subscriber *ezmq.EZMQSubscriber
+	var isSubscribed bool = false
+
+	//Handler for ctrl+c
+	osSignal := make(chan os.Signal, 1)
+	exit := make(chan bool, 1)
+	signal.Notify(osSignal, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-osSignal
+		fmt.Println(sig)
+		if false == isSubscribed {
+			os.Exit(-1)
+		}
+		subscriber.Stop()
+		instance.Terminate()
+		exit <- true
+	}()
 
 	//callbacks
 	subCB := func(event ezmq.Event) { printEvent(event) }
@@ -51,7 +70,7 @@ func main() {
 	}
 
 	//get singleton instance
-	var instance *ezmq.EZMQAPI = ezmq.GetInstance()
+	instance = ezmq.GetInstance()
 
 	//Initilize the EZMQ SDK
 	result = instance.Initialize()
@@ -80,7 +99,8 @@ func main() {
 	//start subscriber
 	result = subscriber.Start()
 	if result != 0 {
-		fmt.Printf("Error while starting subscriber")
+		fmt.Printf("Error while starting subscriber\n")
+		os.Exit(-1)
 	}
 	fmt.Printf("\n[Start] Error code is: %d\n", result)
 
@@ -91,11 +111,12 @@ func main() {
 	}
 
 	if result != 0 {
-		fmt.Printf("Error while Subscribing")
+		fmt.Printf("Error while Subscribing\n")
+		os.Exit(-1)
 	}
+	isSubscribed = true
 	fmt.Printf("\nSuscribed to publisher.. -- Waiting for Events --\n")
 
-	// infinite loop for receiving messages....
-	for {
-	}
+	<-exit
+	fmt.Println("exiting")
 }
