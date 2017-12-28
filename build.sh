@@ -191,6 +191,11 @@ build_x86_and_64() {
     cd ./src/go/samples
     go build -a subscriber.go
     go build -a publisher.go
+
+    # Copy unit test cases
+    cd ./../../../
+    cp -r unittests ./src/go
+    cd ./src/go/unittests
 }
 
 build_arm() {
