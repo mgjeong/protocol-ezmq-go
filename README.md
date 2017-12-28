@@ -94,7 +94,7 @@ Built ezmq package.
      `$ go tool cover -html=coverage.out`
 
 ## Usage guide for ezmq library (For micro-services) ##
-1. The micro-service which wants to use ezmq GO library has to import ezmq package:
+1. The microservice which wants to use ezmq GO library has to import ezmq package:
     `import go/ezmq`
 2. Reference ezmq library APIs : [doc/godoc/ezmq.html](doc/godoc/ezmq.html)
 
