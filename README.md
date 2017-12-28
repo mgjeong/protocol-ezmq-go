@@ -96,6 +96,7 @@ Built ezmq package.
 ## Usage guide for ezmq library (For micro-services) ##
 1. The micro-service which wants to use ezmq GO library has to import ezmq package:
     `import go/ezmq`
+2. Reference ezmq library APIs : [doc/godoc/ezmq.html](doc/godoc/ezmq.html)
 
 ## Running static analyzer for ezmq library ##
 1. Goto: **~/${GOPATH}/src/go/**
