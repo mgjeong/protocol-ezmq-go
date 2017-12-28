@@ -87,6 +87,7 @@ Enter 2 for Topic Based delivery
 $ go tool vet -all .
 ```
 </br>
+
 ## Future Work ##
   - High speed parallel ordered serialization / deserialization based on streaming load.
   - Threadpool for multi-subscriber handling.
