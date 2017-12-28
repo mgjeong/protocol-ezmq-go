@@ -10,9 +10,9 @@ and serialization / deserialization middlewares along with some added functional
 ## Prerequisites ##
  - You must install basic prerequisites for build 
    - Install build-essential
-   ```
-   $ sudo apt-get install build-essential
-   ```
+      ```
+      $ sudo apt-get install build-essential
+      ```
 - Python
   - Version : 2.4 to 3.0
   - [How to install](https://wiki.python.org/moin/BeginnersGuide/Download)
@@ -28,10 +28,10 @@ and serialization / deserialization middlewares along with some added functional
 
 ## How to build ##
 1. Goto: ~/protocol-ezmq-go/</br>
-2. 
-```
-./build.sh <options>
-```
+2. Run the script:
+   ```
+   ./build.sh <options>
+   ```
 **Notes:** </br>
 (a) For getting help about script option: **$ ./build.sh --help** </br>
 (b) Currently, Script needs sudo permission for installing zeroMQ and protobuf libraries. In future need for sudo will be removed by installing those libraries in ezmq library.
@@ -49,32 +49,49 @@ and serialization / deserialization middlewares along with some added functional
  
 ### Subscriber sample ###
 1. Goto: ~/${GOPATH}/src/go/samples/
-2. 
-```
-./subscriber
-```
-3.  On successful running it will show following logs
-```
-2017-12-21T01:22:15.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
-[Initialize] Error code is: 0
-Enter 1 for General Event testing
-Enter 2 for Topic Based delivery
-```
+2. Run the sample:
+   ```
+   ./subscriber
+   ```
+3. On successful running it will show following logs
+   ```
+   2017-12-21T01:22:15.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
+   [Initialize] Error code is: 0
+   Enter 1 for General Event testing
+   Enter 2 for Topic Based delivery
+   ```
 
 ### Publisher sample ###
 
 1. Goto: ~/${GOPATH}/src/go/samples/
-2. 
-```
-./subscriber
-```
-3.  On successful running it will show following logs
-```
-2017-12-21T01:23:25.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
-[Initialize] Error code is: 0
-Enter 1 for General Event testing
-Enter 2 for Topic Based delivery
-```
+2. Run the sampple: 
+   ```
+   ./subscriber
+   ```
+3. On successful running it will show following logs
+   ```
+   2017-12-21T01:23:25.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
+   [Initialize] Error code is: 0
+   Enter 1 for General Event testing
+   Enter 2 for Topic Based delivery
+   ```
+
+## Unit test and code coverage report
+
+### Pre-requisite
+Built ezmq package.
+
+### Run the unit test cases
+1. Goto:  `~/protocol-ezmq-go/src/go/unittests`
+2. Run the script </br>
+   ` $ build.sh`
+
+### Generate the code coverage report
+1. Goto `~/protocol-ezmq-go/src/go/unittests` </br>
+2. Run the script </br>
+    ` $ build.sh`
+3. Run the below command to open coverage report in web browser: </br>
+     `$ go tool cover -html=coverage.out`
 
 ## Usage guide for ezmq library (For micro-services) ##
 1. The micro-service which wants to use ezmq GO library has to import ezmq package:
@@ -82,12 +99,10 @@ Enter 2 for Topic Based delivery
 
 ## Running static analyzer for ezmq library ##
 1. Goto: **~/${GOPATH}/src/go/**
-2. Run the below command:</br>
-```
-$ go tool vet -all .
-```
-</br>
-
+2. Run the below command:</br> 
+   ``` 
+   $ go tool vet -all . 
+   ```
 ## Future Work ##
   - High speed parallel ordered serialization / deserialization based on streaming load.
   - Threadpool for multi-subscriber handling.
