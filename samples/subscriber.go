@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 )
 
@@ -39,15 +41,50 @@ func printEvent(event ezmq.Event) {
 	fmt.Printf("\n--------------------------------------\n")
 }
 
+func printError() {
+	fmt.Printf("\nRe-run the application as shown in below examples: \n")
+	fmt.Printf("\n  (1) For subscribing without topic: ")
+	fmt.Printf("\n     ./subscriber -ip 107.108.81.116 -port 5562")
+	fmt.Printf("\n     ./subscriber -ip localhost -port 5562\n")
+	fmt.Printf("\n  (2) For subscribing with topic: ")
+	fmt.Printf("\n     ./subscriber -ip 107.108.81.116 -port 5562 -t topic1")
+	fmt.Printf("\n     ./subscriber -ip localhost -port 5562 -t topic1\n")
+	os.Exit(-1)
+}
+
 func main() {
-	var ip string = "localhost"
-	var port int = 5562
+	var ip string
+	var port int
+	var topic string
 	var result ezmq.EZMQErrorCode
 	var instance *ezmq.EZMQAPI
 	var subscriber *ezmq.EZMQSubscriber
 	var isSubscribed bool = false
 
-	//Handler for ctrl+c
+	// get ip and port from command line arguments
+	if len(os.Args) != 5 && len(os.Args) != 7 {
+		printError()
+	}
+
+	for n := 1; n < len(os.Args); n++ {
+		if 0 == strings.Compare(os.Args[n], "-ip") {
+			ip = os.Args[n+1]
+			fmt.Printf("\nGiven Ip: %s", ip)
+			n = n + 1
+		} else if 0 == strings.Compare(os.Args[n], "-port") {
+			port, _ = strconv.Atoi(os.Args[n+1])
+			fmt.Printf("\nGiven Port %d: ", port)
+			n = n + 1
+		} else if 0 == strings.Compare(os.Args[n], "-t") {
+			topic = os.Args[n+1]
+			fmt.Printf("Topic is : %s", topic)
+			n = n + 1
+		} else {
+			printError()
+		}
+	}
+
+	// Handler for ctrl+c
 	osSignal := make(chan os.Signal, 1)
 	exit := make(chan bool, 1)
 	signal.Notify(osSignal, syscall.SIGINT, syscall.SIGTERM)
@@ -62,43 +99,29 @@ func main() {
 		exit <- true
 	}()
 
-	//callbacks
+	// callbacks
 	subCB := func(event ezmq.Event) { printEvent(event) }
 	subTopicCB := func(topic string, event ezmq.Event) {
 		fmt.Printf("\nTopic: %s", topic)
 		printEvent(event)
 	}
 
-	//get singleton instance
+	// get singleton instance
 	instance = ezmq.GetInstance()
 
 	//Initilize the EZMQ SDK
 	result = instance.Initialize()
 	fmt.Printf("\n[Initialize] Error code is: %d", result)
-
-	//User choice
-	var choice int
-	var topic string
-	fmt.Printf("\nEnter 1 for General Event testing")
-	fmt.Printf("\nEnter 2 for Topic Based delivery\n")
-	fmt.Scanf("%d", &choice)
-
-	switch choice {
-	case 1:
-		subscriber = ezmq.GetEZMQSubscriber(ip, port, subCB, subTopicCB)
-	case 2:
-		subscriber = ezmq.GetEZMQSubscriber(ip, port, subCB, subTopicCB)
-		fmt.Printf("\nEnter the topic: ")
-		fmt.Scanf("%s", &topic)
-		fmt.Printf("Topic is: %s\n", topic)
-	default:
-		fmt.Printf("\nInvalid choice..[Re-run application]\n")
+	if result != ezmq.EZMQ_OK {
+		fmt.Printf("Error while initializing\n")
 		os.Exit(-1)
 	}
 
-	//start subscriber
+	subscriber = ezmq.GetEZMQSubscriber(ip, port, subCB, subTopicCB)
+
+	// start subscriber
 	result = subscriber.Start()
-	if result != 0 {
+	if result != ezmq.EZMQ_OK {
 		fmt.Printf("Error while starting subscriber\n")
 		os.Exit(-1)
 	}
@@ -110,7 +133,7 @@ func main() {
 		result = subscriber.SubscribeForTopic(topic)
 	}
 
-	if result != 0 {
+	if result != ezmq.EZMQ_OK {
 		fmt.Printf("Error while Subscribing\n")
 		os.Exit(-1)
 	}

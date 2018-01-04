@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -67,14 +69,43 @@ func getEvent() ezmq.Event {
 	return event
 }
 
+func printError() {
+	fmt.Printf("\nRe-run the application as shown in below example: \n")
+	fmt.Printf("\n  (1) For publishing without topic: ")
+	fmt.Printf("\n      ./publisher -port 5562\n")
+	fmt.Printf("\n  (2) For publishing with topic: ")
+	fmt.Printf("\n      ./publisher -port 5562 -t topic1 \n")
+	os.Exit(-1)
+}
+
 func main() {
-	var port int = 5562
+	var port int
+	var topic string
 	var result ezmq.EZMQErrorCode
 	var publisher *ezmq.EZMQPublisher = nil
 	var instance *ezmq.EZMQAPI = nil
 	startCB := func(code ezmq.EZMQErrorCode) { fmt.Printf("startCB") }
 	stopCB := func(code ezmq.EZMQErrorCode) { fmt.Printf("stopCB") }
 	errorCB := func(code ezmq.EZMQErrorCode) { fmt.Printf("errorCB") }
+
+	// get port from command line arguments
+	if len(os.Args) != 3 && len(os.Args) != 5 {
+		printError()
+	}
+
+	for n := 1; n < len(os.Args); n++ {
+		if 0 == strings.Compare(os.Args[n], "-port") {
+			port, _ = strconv.Atoi(os.Args[n+1])
+			fmt.Printf("\nGiven Port %d: ", port)
+			n = n + 1
+		} else if 0 == strings.Compare(os.Args[n], "-t") {
+			topic = os.Args[n+1]
+			fmt.Printf("Topic is : %s", topic)
+			n = n + 1
+		} else {
+			printError()
+		}
+	}
 
 	//Handler for ctrl+c
 	osSignal := make(chan os.Signal, 1)
@@ -97,36 +128,26 @@ func main() {
 	//Initilize the EZMQ SDK
 	result = instance.Initialize()
 	fmt.Printf("\n[Initialize] Error code is: %d", result)
-
-	//User choice
-	var choice int
-	var topic string
-	fmt.Printf("\nEnter 1 for General Event testing")
-	fmt.Printf("\nEnter 2 for Topic Based delivery\n")
-	fmt.Scanf("%d", &choice)
-
-	switch choice {
-	case 1:
-		publisher = ezmq.GetEZMQPublisher(port, startCB, stopCB, errorCB)
-	case 2:
-		publisher = ezmq.GetEZMQPublisher(port, startCB, stopCB, errorCB)
-		fmt.Printf("\nEnter the topic: ")
-		fmt.Scanf("%s", &topic)
-		fmt.Printf("Topic is: %s\n", topic)
-	default:
-		fmt.Printf("\nInvalid choice..[Re-run application]\n")
+	if result != ezmq.EZMQ_OK {
+		fmt.Printf("Error while initializing\n")
 		os.Exit(-1)
 	}
+	publisher = ezmq.GetEZMQPublisher(port, startCB, stopCB, errorCB)
 
 	//start publisher
 	result = publisher.Start()
-	if result != 0 {
+	if result != ezmq.EZMQ_OK {
 		fmt.Printf("\nError while starting publisher\n")
 		os.Exit(-1)
 	}
 	fmt.Printf("\n[Start] Error code is: %d", result)
 
 	var event ezmq.Event = getEvent()
+
+	// This delay is added to prevent ZeroMQ first packet drop during
+	// initial connection of publisher and subscriber.
+	time.Sleep(1000 * time.Millisecond)
+
 	fmt.Printf("\n--------- Will Publish 15 events at interval of 1 seconds ---------\n")
 	for i := 0; i < 15; i++ {
 		if topic == "" {
@@ -134,7 +155,7 @@ func main() {
 		} else {
 			result = publisher.PublishOnTopic(topic, event)
 		}
-		if result != 0 {
+		if result != ezmq.EZMQ_OK {
 			fmt.Printf("\nError while publishing")
 		}
 		fmt.Printf("\nPublished event result: %d\n", result)
@@ -143,7 +164,7 @@ func main() {
 
 	//stop publisher
 	result = publisher.Stop()
-	if result != 0 {
+	if result != ezmq.EZMQ_OK {
 		fmt.Printf("Error while Stopping publisher")
 	}
 	fmt.Printf("\n[Stop] Error code is: %d\n", result)

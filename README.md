@@ -8,7 +8,7 @@ and serialization / deserialization middlewares along with some added functional
   - High speed serialization and deserialization.
 
 ## Prerequisites ##
- - You must install basic prerequisites for build 
+ - You must install basic prerequisites for build
    - Install build-essential
       ```
       $ sudo apt-get install build-essential
@@ -20,7 +20,7 @@ and serialization / deserialization middlewares along with some added functional
 - SCons
   - Version : 2.3.0 or above
   - [How to install](http://scons.org/doc/2.3.0/HTML/scons-user/c95.html)
-  
+
 - Go compiler
   - Version : 1.9
   - [How to install](https://golang.org/doc/install)
@@ -46,35 +46,25 @@ and serialization / deserialization middlewares along with some added functional
 
 ### Prerequisites ###
  Built ezmq library
- 
+
 ### Subscriber sample ###
 1. Goto: ~/${GOPATH}/src/go/samples/
 2. Run the sample:
-   ```
-   ./subscriber
-   ```
-3. On successful running it will show following logs
-   ```
-   2017-12-21T01:22:15.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
-   [Initialize] Error code is: 0
-   Enter 1 for General Event testing
-   Enter 2 for Topic Based delivery
-   ```
+    ```
+     ./subscriber
+    ```
+    - **It will give list of options for running the sample.** </br>
+    - **Update ip, port and topic as per requirement.** </br>
 
 ### Publisher sample ###
 
 1. Goto: ~/${GOPATH}/src/go/samples/
-2. Run the sampple: 
+2. Run the sample:
    ```
-   ./subscriber
+   ./publisher
    ```
-3. On successful running it will show following logs
-   ```
-   2017-12-21T01:23:25.754+0530    DEBUG   ezmq/ezmqapi.go:38      EZMQ initialized
-   [Initialize] Error code is: 0
-   Enter 1 for General Event testing
-   Enter 2 for Topic Based delivery
-   ```
+   - **It will give list of options for running the sample.** </br>
+   - **Update port and topic as per requirement.** </br>
 
 ## Unit test and code coverage report
 
@@ -100,9 +90,9 @@ Built ezmq package.
 
 ## Running static analyzer for ezmq library ##
 1. Goto: **~/${GOPATH}/src/go/**
-2. Run the below command:</br> 
-   ``` 
-   $ go tool vet -all . 
+2. Run the below command:</br>
+   ```
+   $ go tool vet -all .
    ```
 ## Future Work ##
   - High speed parallel ordered serialization / deserialization based on streaming load.
@@ -110,4 +100,3 @@ Built ezmq package.
   - Router pattern. For number of subscribers to single publisher use case.
   - Clustering Support.
 </br></br>
-
