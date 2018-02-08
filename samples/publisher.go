@@ -69,6 +69,13 @@ func getEvent() ezmq.Event {
 	return event
 }
 
+func getByteDataEvent() ezmq.EZMQByteData {
+	var bytes ezmq.EZMQByteData
+	byteArray := [5]byte{0x40, 0x05, 0x10, 0x11, 0x12}
+	bytes.ByteData = byteArray[:]
+	return bytes
+}
+
 func printError() {
 	fmt.Printf("\nRe-run the application as shown in below example: \n")
 	fmt.Printf("\n  (1) For publishing without topic: ")
@@ -143,6 +150,7 @@ func main() {
 	fmt.Printf("\n[Start] Error code is: %d", result)
 
 	var event ezmq.Event = getEvent()
+	//var byteData ezmq.EZMQByteData = getByteDataEvent()
 
 	// This delay is added to prevent ZeroMQ first packet drop during
 	// initial connection of publisher and subscriber.
@@ -152,8 +160,10 @@ func main() {
 	for i := 0; i < 15; i++ {
 		if topic == "" {
 			result = publisher.Publish(event)
+			// result = publisher.Publish(byteData)
 		} else {
 			result = publisher.PublishOnTopic(topic, event)
+			//result = publisher.PublishOnTopic(topic, byteData)
 		}
 		if result != ezmq.EZMQ_OK {
 			fmt.Printf("\nError while publishing")

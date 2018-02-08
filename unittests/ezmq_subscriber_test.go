@@ -30,8 +30,8 @@ var subResult ezmq.EZMQErrorCode
 var subApiInstance *ezmq.EZMQAPI
 var subscriber *ezmq.EZMQSubscriber
 
-func subCB(event ezmq.Event)                    { fmt.Printf("\nsubCB") }
-func subTopicCB(topic string, event ezmq.Event) { fmt.Printf("\nsubTopicCB") }
+func subCB(ezmqMsg ezmq.EZMQMessage)                    { fmt.Printf("\nsubCB") }
+func subTopicCB(topic string, ezmqMsg ezmq.EZMQMessage) { fmt.Printf("\nsubTopicCB") }
 
 func TestGetSubInstance(t *testing.T) {
 	subApiInstance = ezmq.GetInstance()
