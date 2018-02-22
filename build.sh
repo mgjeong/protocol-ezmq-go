@@ -28,6 +28,7 @@ export GOPATH=$PWD
 DEP_ROOT=$(pwd)/dependencies
 EZMQ_TARGET_ARCH="$(uname -m)"
 EZMQ_WITH_DEP=false
+EZMQ_BUILD_MODE="release"
 
 install_dependencies() {
     # download required tool chain for cross compilation [arm/arm64/armhf]
@@ -173,113 +174,108 @@ install_dependencies() {
 }
 
 build_x86_and_64() {
-    if [ ${EZMQ_WITH_DEP} = true ]; then
-        install_dependencies
-    fi
-    cd $PROJECT_ROOT
+    cd $PROJECT_ROOT/src/go/
     #build ezmq SDK
-    mkdir ./src/go
-    cp -r ezmq ./src/go
-    cp -r samples ./src/go
-    cd ./src/go/ezmq
-    go build
-    go install
-
-    #build samples
-    cd ./../../../
-    cp -r samples ./src/go
-    cd ./src/go/samples
-    go build -a subscriber.go
-    go build -a publisher.go
-
-    # Copy unit test cases
-    cd ./../../../
-    cp -r unittests ./src/go
-    cd ./src/go/unittests
+    cd ./ezmq
+    if [ "debug" = ${EZMQ_BUILD_MODE} ]; then
+        go build -tags=debug
+        go install
+        #build samples
+        cd ../samples
+        go build -a -tags=debug subscriber.go
+        go build -a -tags=debug publisher.go
+    else
+        go build
+        go install
+        #build samples
+        cd ../samples
+        go build -a subscriber.go
+        go build -a publisher.go
+    fi
 }
 
 build_arm() {
-    echo -e "Building for arm"
-    if [ ${EZMQ_WITH_DEP} = true ]; then
-        install_dependencies
-    fi
-    cd $PROJECT_ROOT
+    cd $PROJECT_ROOT/src/go/
     #build ezmq SDK
-    mkdir ./src/go
-    cp -r  ezmq ./src/go
-    cd ./src/go/ezmq
-    CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build
-    CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go install
-
-    #build samples
-    cd ./../../../
-    cp -r samples ./src/go
-    cd ./src/go/samples
-    CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build subscriber.go
-    CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build publisher.go
+    cd ./ezmq
+    if [ "debug" = ${EZMQ_BUILD_MODE} ]; then
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build -tags=debug
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build -a -tags=debug subscriber.go
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build -a -tags=debug publisher.go
+    else
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build -a subscriber.go
+        CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ GOOS=linux GOARCH=arm go build -a publisher.go
+    fi
 }
 
 build_arm64() {
-    echo -e "Building for arm64"
-    if [ ${EZMQ_WITH_DEP} = true ]; then
-        install_dependencies
-    fi
-    cd $PROJECT_ROOT
+    cd $PROJECT_ROOT/src/go/
     #build ezmq SDK
-    mkdir ./src/go
-    cp -r  ezmq ./src/go
-    cd ./src/go/ezmq
-    CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build
-    CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go install
-
-    #build samples
-    cd ./../../../
-    cp -r samples ./src/go
-    cd ./src/go/samples
-    CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build subscriber.go
-    CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build publisher.go
+    cd ./ezmq
+    if [ "debug" = ${EZMQ_BUILD_MODE} ]; then
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build -tags=debug
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build -a -tags=debug subscriber.go
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build -a -tags=debug publisher.go
+    else
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build -a subscriber.go
+        CGO_ENABLED=1 CC=/usr/bin/aarch64-linux-gnu-gcc-4.8 CXX=/usr/bin/aarch64-linux-gnu-g++-4.8 GOOS=linux GOARCH=arm64 go build -a publisher.go
+    fi
 }
 
 build_armhf() {
-    echo -e "Building for armhf"
-    if [ ${EZMQ_WITH_DEP} = true ]; then
-        install_dependencies
-    fi
-    cd $PROJECT_ROOT
+    cd $PROJECT_ROOT/src/go/
     #build ezmq SDK
-    mkdir ./src/go
-    cp -r  ezmq ./src/go
-    cd ./src/go/ezmq
-    CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build
-    CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go install
-
-    #build samples
-    cd ./../../../
-    cp -r samples ./src/go
-    cd ./src/go/samples
-    CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -a subscriber.go
-    CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -a publisher.go
+    cd ./ezmq
+    if [ "debug" = ${EZMQ_BUILD_MODE} ]; then
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -tags=debug
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go install
+        #build samples
+        cd ../samples
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -a -tags=debug subscriber.go
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -a -tags=debug publisher.go
+    else
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go install
+        #build samples
+        cd ../samples
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -a subscriber.go
+        CGO_LDFLAGS+='-Bstatic -lzmq -lprotobuf -Bdynamic -lstdc++ -lm' GOOS=linux GOARCH=arm CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc-4.8 CXX=arm-linux-gnueabihf-g++-4.8 go build -a publisher.go
+    fi
 }
 
 build_armhf_qemu() {
-    echo -e "Building for armhf-qemu"
-    if [ ${EZMQ_WITH_DEP} = true ]; then
-        install_dependencies
-    fi
-    cd $PROJECT_ROOT
+    cd $PROJECT_ROOT/src/go/
     #build ezmq SDK
-    mkdir ./src/go
-    cp -r  ezmq ./src/go
-    cd ./src/go/ezmq
-    CGO_ENABLED=1 GOOS=linux GOARCH=arm go build
-    CGO_ENABLED=1 GOOS=linux GOARCH=arm go install
-
-    #build samples
-    cd ./../../../
-    cp -r samples ./src/go
-    cd ./src/go/samples
-    CGO_ENABLED=1 GOOS=linux GOARCH=arm go build subscriber.go
-    CGO_ENABLED=1 GOOS=linux GOARCH=arm go build publisher.go
+    cd ./ezmq
+    if [ "debug" = ${EZMQ_BUILD_MODE} ]; then
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -tags=debug
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a -tags=debug subscriber.go
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a -tags=debug publisher.go
+    else
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a subscriber.go
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a publisher.go
+    fi
 }
 
 clean_ezmq() {
@@ -301,6 +297,7 @@ usage() {
     echo -e "${GREEN}Options:${NO_COLOUR}"
     echo "  --target_arch=[x86|x86_64|arm|arm64|armhf|armhf-qemu]        :  Choose Target Architecture"
     echo "  --with_dependencies=(default: false)                         :  Build ezmq along with dependencies [zmq and protobuf]"
+    echo "  --build_mode=[release|debug](default: release)               :  Build ezmq library and samples in release or debug mode"
     echo "  -c                                                           :  Clean ezmq Repository and its dependencies"
     echo "  -h / --help                                                  :  Display help and exit [Be careful it will also remove GOPATH:src, pkg and bin]"
     echo -e "${GREEN}Examples: ${NO_COLOUR}"
@@ -308,11 +305,61 @@ usage() {
     echo "  $ ./build.sh --target_arch=x86_64"
     echo "  $ ./build.sh --with_dependencies=true --target_arch=x86_64 "
     echo -e "${BLUE}  clean:-${NO_COLOUR}"
+    echo -e "${BLUE}  debug mode build:-${NO_COLOUR}"
+    echo "  $ ./build.sh --target_arch=x86_64 --build_mode=debug"
     echo "  $ ./build.sh -c"
     echo -e "${BLUE}  help:-${NO_COLOUR}"
     echo "  $ ./build.sh -h"
     echo -e "${GREEN}Notes: ${NO_COLOUR}"
     echo "  - While building newly for any architecture use -with_dependencies=true option."
+}
+
+build_ezmq() {
+    #dependencies
+    if [ ${EZMQ_WITH_DEP} = true ]; then
+        install_dependencies
+    fi
+    cd $PROJECT_ROOT
+    if [ -d "./src/go" ] ; then
+        echo "src/go folder exits"
+    else
+        mkdir ./src/go
+    fi
+    #copy ezmq SDK files
+    cp -r ezmq ./src/go
+    #copy ezmq samples
+    cp -r samples ./src/go
+    # Copy unit test cases
+    cp -r unittests ./src/go
+
+    if [ "x86" = ${EZMQ_TARGET_ARCH} ]; then
+        echo -e "Building for x86"
+        build_x86_and_64;
+        echo -e "${GREEN}Build done${NO_COLOUR}"
+        exit 0;
+    elif [ "x86_64" = ${EZMQ_TARGET_ARCH} ]; then
+         echo -e "Building for x86_64"
+         build_x86_and_64;
+         echo -e "${GREEN}Build done${NO_COLOUR}"
+         exit 0;
+    elif [ "arm" = ${EZMQ_TARGET_ARCH} ]; then
+         build_arm;
+         echo -e "${GREEN}Build done${NO_COLOUR}"
+         exit 0;
+    elif [ "arm64" = ${EZMQ_TARGET_ARCH} ]; then
+         build_arm64;
+         echo -e "${GREEN}Build done${NO_COLOUR}"
+         exit 0;
+    elif [ "armhf" = ${EZMQ_TARGET_ARCH} ]; then
+         build_armhf;
+         echo -e "${GREEN}Build done${NO_COLOUR}"
+         exit 0;
+    elif [ "armhf-qemu" = ${EZMQ_TARGET_ARCH} ]; then
+         build_armhf_qemu; exit 0;
+    else
+         echo -e "${RED}Not a supported architecture${NO_COLOUR}"
+         usage; exit 1;
+    fi
 }
 
 process_cmd_args() {
@@ -337,35 +384,13 @@ process_cmd_args() {
                 ;;
             --target_arch=*)
                 EZMQ_TARGET_ARCH="${1#*=}";
-                if [ "x86" = ${EZMQ_TARGET_ARCH} ]; then
-                    echo -e "Building for x86"
-                    build_x86_and_64;
-                    echo -e "${GREEN}Build done${NO_COLOUR}"
-                    exit 0;
-                elif [ "x86_64" = ${EZMQ_TARGET_ARCH} ]; then
-                    echo -e "Building for x86_64"
-                    build_x86_and_64;
-                    echo -e "${GREEN}Build done${NO_COLOUR}"
-                    exit 0;
-                elif [ "arm" = ${EZMQ_TARGET_ARCH} ]; then
-                    build_arm;
-                    echo -e "${GREEN}Build done${NO_COLOUR}"
-                    exit 0;
-                elif [ "arm64" = ${EZMQ_TARGET_ARCH} ]; then
-                    build_arm64;
-                    echo -e "${GREEN}Build done${NO_COLOUR}"
-                    exit 0;
-                elif [ "armhf" = ${EZMQ_TARGET_ARCH} ]; then
-                    build_armhf;
-                    echo -e "${GREEN}Build done${NO_COLOUR}"
-                    exit 0;
-                elif [ "armhf-qemu" = ${EZMQ_TARGET_ARCH} ]; then
-                    build_armhf_qemu; exit 0;
-                else
-                    echo -e "${RED}Not a supported architecture${NO_COLOUR}"
-                    usage; exit 1;
-                    fi
-                    shift 1
+                echo -e "${GREEN}Target Arch is: $EZMQ_TARGET_ARCH${NO_COLOUR}"
+                shift 1
+                ;;
+            --build_mode=*)
+                EZMQ_BUILD_MODE="${1#*=}";
+                echo -e "${GREEN}Build mode is: $EZMQ_BUILD_MODE${NO_COLOUR}"
+                shift 1;
                 ;;
             -c)
                 clean_ezmq
@@ -394,3 +419,5 @@ process_cmd_args() {
 }
 
 process_cmd_args "$@"
+build_ezmq
+
