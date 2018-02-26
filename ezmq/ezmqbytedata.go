@@ -17,12 +17,26 @@
 
 package ezmq
 
-type EZMQStatusCode int
+//Structure represents EZMQByteData.
+type EZMQByteData struct {
+	ByteData []byte
+}
 
-// Constants represents EZMQ Status codes.
-const (
-	EZMQ_Unknown     = 0
-	EZMQ_Constructed = 1
-	EZMQ_Initialized = 2
-	EZMQ_Terminated  = 3
-)
+// Get byte data
+func (dataInstance *EZMQByteData) GetByteData() []byte {
+	return dataInstance.ByteData
+}
+
+//set byte data
+func (dataInstance *EZMQByteData) SetByteData(byteData []byte) EZMQErrorCode {
+	if nil == byteData {
+		return EZMQ_ERROR
+	}
+	dataInstance.ByteData = byteData
+	return EZMQ_OK
+}
+
+//Get Content type
+func (dataInstance EZMQByteData) GetContentType() EZMQContentType {
+	return EZMQ_CONTENT_TYPE_BYTEDATA
+}

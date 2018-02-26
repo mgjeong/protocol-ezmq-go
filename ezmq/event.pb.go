@@ -51,6 +51,11 @@ func (m *Event) String() string            { return proto.CompactTextString(m) }
 func (*Event) ProtoMessage()               {}
 func (*Event) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+//This method is added specifically for ezmq message.
+func (m Event) GetContentType() EZMQContentType {
+	return EZMQ_CONTENT_TYPE_PROTOBUF
+}
+
 func (m *Event) GetId() string {
 	if m != nil && m.Id != nil {
 		return *m.Id

@@ -33,10 +33,10 @@ const SUB_TCP_PREFIX = "tcp://"
 const INPROC_PREFIX = "inproc://shutdown-"
 
 // Callback to get all the subscribed events.
-type EZMQSubCB func(event Event)
+type EZMQSubCB func(event EZMQMessage)
 
 // Callback to get all the subscribed events for a specific topic.
-type EZMQSubTopicCB func(topic string, event Event)
+type EZMQSubTopicCB func(topic string, event EZMQMessage)
 
 // Structure represents EZMQSubscriber.
 type EZMQSubscriber struct {
@@ -78,50 +78,84 @@ func GetEZMQSubscriber(ip string, port int, subCallback EZMQSubCB, subTopicCallb
 	return instance
 }
 
-func receive(subInstance *EZMQSubscriber) {
-	var data []byte
+func parseSocketData(subInstance *EZMQSubscriber) {
+	var frame1 []byte
+	var frame2 []byte
+	var frame3 []byte
 	var event Event
-	var err error
-	var more bool
+	var ezmqByteData EZMQByteData
+	var isTopic bool = false
 	var topic string
+	var more bool = false
+	var err error
+
+	if nil == subInstance.subscriber {
+		logger.Error("subscriber is null")
+		return
+	}
+
+	frame1, err = subInstance.subscriber.RecvBytes(0)
+	if err == nil {
+		more, _ = subInstance.subscriber.GetRcvmore()
+		if true == more {
+			frame2, err = subInstance.subscriber.RecvBytes(0)
+			if err == nil {
+				more, _ = subInstance.subscriber.GetRcvmore()
+				if true == more {
+					frame3, err = subInstance.subscriber.RecvBytes(0)
+					isTopic = true
+				}
+			}
+		}
+	}
+	if false == isTopic {
+		frame3 = frame2[:]
+		frame2 = frame1[:]
+	} else {
+		topic = string(frame1[:])
+	}
+
+	//Parse header
+	ezmqHeader := frame2[0]
+	var contentType byte = (ezmqHeader >> 5)
+
+	// Parse the data
+	if EZMQ_CONTENT_TYPE_PROTOBUF == contentType {
+		//change byte array to Event
+		err = proto.Unmarshal(frame3, &event)
+		if nil != err {
+			logger.Error("Error in unmarshalling data")
+		}
+		if isTopic {
+			subInstance.subTopicCallback(topic, event)
+		} else {
+			subInstance.subCallback(event)
+		}
+	} else if EZMQ_CONTENT_TYPE_BYTEDATA == contentType {
+		ezmqByteData.ByteData = frame3
+		if isTopic {
+			subInstance.subTopicCallback(topic, ezmqByteData)
+		} else {
+			subInstance.subCallback(ezmqByteData)
+		}
+	} else {
+		logger.Error("Not a supported type")
+	}
+}
+
+func receive(subInstance *EZMQSubscriber) {
 	var sockets []zmq.Polled
 	var socket zmq.Polled
 	var soc *zmq.Socket
-	var index int
+	var err error
+
 	for {
 		sockets, err = subInstance.poller.Poll(-1)
 		if err == nil {
-			for index, socket = range sockets {
+			for _, socket = range sockets {
 				switch soc = socket.Socket; soc {
 				case subInstance.subscriber:
-					if nil == subInstance.subscriber {
-						logger.Error("subscriber is null", zap.Int("Index", index))
-						break
-					}
-					data, err = subInstance.subscriber.RecvBytes(0)
-					if err != nil {
-						break
-					}
-					more, err = subInstance.subscriber.GetRcvmore()
-					if err != nil {
-						break
-					}
-					if more {
-						topic = string(data[:])
-						data, err = subInstance.subscriber.RecvBytes(0)
-					}
-
-					//change byte array to Event
-					err := proto.Unmarshal(data, &event)
-					if nil != err {
-						logger.Error("Error in unmarshalling data")
-					}
-
-					if more {
-						subInstance.subTopicCallback(topic, event)
-					} else {
-						subInstance.subCallback(event)
-					}
+					parseSocketData(subInstance)
 				case subInstance.shutdownClient:
 					logger.Debug("Received shut down request")
 					goto End

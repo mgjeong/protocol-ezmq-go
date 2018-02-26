@@ -103,27 +103,86 @@ func (pubInstance *EZMQPublisher) Start() EZMQErrorCode {
 	return EZMQ_OK
 }
 
+func getHeader(content EZMQContentType) []byte {
+
+	var ezmqHeader byte = 0x00
+	var version byte = 1
+	var contentType byte = (byte)(content)
+
+	version = (byte)(version << 2)
+	ezmqHeader = (byte)(ezmqHeader | version)
+	contentType = (byte)(contentType << 5)
+	ezmqHeader = (byte)(ezmqHeader | contentType)
+
+	header := [1]byte{ezmqHeader}
+	return header[:]
+}
+
+func (pubInstance *EZMQPublisher) publishInternal(topic string, ezmqMsg EZMQMessage) EZMQErrorCode {
+
+	if nil == ezmqMsg {
+		return EZMQ_ERROR
+	}
+	// form the EZMQ header
+	contentType := ezmqMsg.GetContentType()
+	header := getHeader(contentType)
+
+	// form the EZMQ data
+	var byteEvent []byte = nil
+	var err error
+	if contentType == EZMQ_CONTENT_TYPE_PROTOBUF {
+		event := ezmqMsg.(Event)
+		byteEvent, err = proto.Marshal(&event)
+		if nil != err {
+			logger.Error("Error occured while marshalling event")
+			return EZMQ_ERROR
+		}
+	} else if contentType == EZMQ_CONTENT_TYPE_BYTEDATA {
+		ezmqByteData := ezmqMsg.(EZMQByteData)
+		byteEvent = ezmqByteData.GetByteData()
+	} else {
+		logger.Error("Not a supported type")
+		return EZMQ_INVALID_CONTENT_TYPE
+	}
+
+	if nil == byteEvent {
+		logger.Error("nil byte event")
+		return EZMQ_ERROR
+	}
+
+	// send topic [if any]
+	if topic != "" {
+		result, err := pubInstance.publisher.Send(topic, zmq.SNDMORE)
+		if nil != err {
+			logger.Error("Error while sending topic", zap.Int("Sent bytes", result))
+			return EZMQ_ERROR
+		}
+	}
+
+	// send header
+	result, err := pubInstance.publisher.SendBytes(header, zmq.SNDMORE)
+	if nil != err {
+		logger.Error("Error while sending header", zap.Int("Sent bytes", result))
+		return EZMQ_ERROR
+	}
+
+	// send data
+	result, err = pubInstance.publisher.SendBytes(byteEvent, 0)
+	if nil != err {
+		logger.Error("Error while publishing data", zap.Int("Sent bytes", result))
+		return EZMQ_ERROR
+	}
+	logger.Debug("Published data")
+	return EZMQ_OK
+}
+
 // Publish events on the socket for subscribers.
-func (pubInstance *EZMQPublisher) Publish(event Event) EZMQErrorCode {
+func (pubInstance *EZMQPublisher) Publish(ezmqMsg EZMQMessage) EZMQErrorCode {
 	if nil == pubInstance.publisher {
 		logger.Error("Publisher is null")
 		return EZMQ_ERROR
 	}
-
-	//marshal the protobuf event
-	byteEvent, err := proto.Marshal(&event)
-	if nil != err {
-		logger.Error("Error occured while marshalling event")
-		return EZMQ_ERROR
-	}
-	//Publish event
-	result, err := pubInstance.publisher.SendBytes(byteEvent, 0)
-	if nil != err {
-		logger.Error("Error while publishing", zap.Int("Sent bytes", result))
-		return EZMQ_ERROR
-	}
-	logger.Debug("Published without topic")
-	return EZMQ_OK
+	return pubInstance.publishInternal("", ezmqMsg)
 }
 
 // Publish events on a specific topic on socket for subscribers.
@@ -131,7 +190,7 @@ func (pubInstance *EZMQPublisher) Publish(event Event) EZMQErrorCode {
 // Note:
 // (1) Topic name should be as path format. For example:home/livingroom/
 // (2) Topic name can have letters [a-z, A-z], numerics [0-9] and special characters _ - / and .
-func (pubInstance *EZMQPublisher) PublishOnTopic(topic string, event Event) EZMQErrorCode {
+func (pubInstance *EZMQPublisher) PublishOnTopic(topic string, ezmqMsg EZMQMessage) EZMQErrorCode {
 	if nil == pubInstance.publisher {
 		return EZMQ_ERROR
 	}
@@ -141,26 +200,7 @@ func (pubInstance *EZMQPublisher) PublishOnTopic(topic string, event Event) EZMQ
 	if validTopic == "" {
 		return EZMQ_INVALID_TOPIC
 	}
-
-	//Publish event
-	result, err := pubInstance.publisher.Send(validTopic, zmq.SNDMORE)
-	if nil != err {
-		logger.Error("Error while publishing", zap.Int("Sent bytes", result))
-		return EZMQ_ERROR
-	}
-
-	//marshal the protobuf event
-	byteEvent, err := proto.Marshal(&event)
-	if nil != err {
-		return EZMQ_ERROR
-	}
-	result1, err1 := pubInstance.publisher.SendBytes(byteEvent, 0)
-	if nil != err1 {
-		logger.Error("Error while publishing", zap.Int("Sent bytes", result1))
-		return EZMQ_ERROR
-	}
-	logger.Debug("Published on topic", zap.String("Topic", validTopic))
-	return EZMQ_OK
+	return pubInstance.publishInternal(validTopic, ezmqMsg)
 }
 
 // Publish an events on list of topics on socket for subscribers. On any of
@@ -170,12 +210,12 @@ func (pubInstance *EZMQPublisher) PublishOnTopic(topic string, event Event) EZMQ
 // Note:
 // (1) Topic name should be as path format. For example:home/livingroom/
 // (2) Topic name can have letters [a-z, A-z], numerics [0-9] and special characters _ - / and .
-func (pubInstance *EZMQPublisher) PublishOnTopicList(topicList List.List, event Event) EZMQErrorCode {
+func (pubInstance *EZMQPublisher) PublishOnTopicList(topicList List.List, ezmqMsg EZMQMessage) EZMQErrorCode {
 	if topicList.Len() == 0 {
 		return EZMQ_INVALID_TOPIC
 	}
 	for topic := topicList.Front(); topic != nil; topic = topic.Next() {
-		result := pubInstance.PublishOnTopic(topic.Value.(string), event)
+		result := pubInstance.PublishOnTopic(topic.Value.(string), ezmqMsg)
 		if result != EZMQ_OK {
 			return EZMQ_ERROR
 		}

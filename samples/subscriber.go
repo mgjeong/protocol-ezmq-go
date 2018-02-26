@@ -41,6 +41,14 @@ func printEvent(event ezmq.Event) {
 	fmt.Printf("\n--------------------------------------\n")
 }
 
+func printByteData(byteData []byte) {
+	fmt.Printf("\n--------------------------------------\n")
+	for i := 0; i < len(byteData); i++ {
+		fmt.Printf(" %x", byteData[i])
+	}
+	fmt.Printf("\n--------------------------------------\n")
+}
+
 func printError() {
 	fmt.Printf("\nRe-run the application as shown in below examples: \n")
 	fmt.Printf("\n  (1) For subscribing without topic: ")
@@ -100,10 +108,30 @@ func main() {
 	}()
 
 	// callbacks
-	subCB := func(event ezmq.Event) { printEvent(event) }
-	subTopicCB := func(topic string, event ezmq.Event) {
+	subCB := func(ezmqMsg ezmq.EZMQMessage) {
+		contentType := ezmqMsg.GetContentType()
+		if contentType == ezmq.EZMQ_CONTENT_TYPE_PROTOBUF {
+			fmt.Printf("\nContent-type is protobuf")
+			event := ezmqMsg.(ezmq.Event)
+			printEvent(event)
+		} else if contentType == ezmq.EZMQ_CONTENT_TYPE_BYTEDATA {
+			fmt.Printf("\nContent-type is Byte data\n")
+			byteData := ezmqMsg.(ezmq.EZMQByteData)
+			printByteData(byteData.GetByteData())
+		}
+	}
+	subTopicCB := func(topic string, ezmqMsg ezmq.EZMQMessage) {
+		contentType := ezmqMsg.GetContentType()
 		fmt.Printf("\nTopic: %s", topic)
-		printEvent(event)
+		if contentType == ezmq.EZMQ_CONTENT_TYPE_PROTOBUF {
+			fmt.Printf("\nContent-type is protobuf")
+			event := ezmqMsg.(ezmq.Event)
+			printEvent(event)
+		} else if contentType == ezmq.EZMQ_CONTENT_TYPE_BYTEDATA {
+			fmt.Printf("\nContent-type is Byte data\n")
+			byteData := ezmqMsg.(ezmq.EZMQByteData)
+			printByteData(byteData.GetByteData())
+		}
 	}
 
 	// get singleton instance

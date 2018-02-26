@@ -88,6 +88,12 @@ func TestPublish1(t *testing.T) {
 		t.Errorf("\nError while publishing event\n")
 	}
 
+	byteData := utils.GetByteDataEvent()
+	pubResult = publisher.Publish(byteData)
+	if pubResult != 0 {
+		t.Errorf("\nError while publishing event\n")
+	}
+
 	pubResult = publisher.Stop()
 	if pubResult != 0 {
 		t.Errorf("\nError while Stopping publisher")
@@ -113,6 +119,11 @@ func TestPublish2(t *testing.T) {
 		t.Errorf("\nError while publishing event on utils.Topic\n")
 	}
 
+	byteData := utils.GetByteDataEvent()
+	pubResult = publisher.PublishOnTopic(utils.Topic, byteData)
+	if pubResult != 0 {
+		t.Errorf("\nError while publishing byte data on utils.Topic\n")
+	}
 	pubResult = publisher.Stop()
 	if pubResult != 0 {
 		t.Errorf("\nError while Stopping publisher")
@@ -142,12 +153,21 @@ func TestPublish3(t *testing.T) {
 	if pubResult != 0 {
 		t.Errorf("\nError while publishing event on utils.Topic list\n")
 	}
+	byteData := utils.GetByteDataEvent()
+	pubResult = publisher.PublishOnTopicList(*topicList, byteData)
+	if pubResult != 0 {
+		t.Errorf("\nError while publishing byte data on utils.Topic list\n")
+	}
 
 	e3 := topicList.PushFront("")
 	_ = e3
 	pubResult = publisher.PublishOnTopicList(*topicList, event)
 	if pubResult == 0 {
 		t.Errorf("\nPublished on wrong utils.Topic list\n")
+	}
+	pubResult = publisher.PublishOnTopicList(*topicList, byteData)
+	if pubResult == 0 {
+		t.Errorf("\nError while publishing byte data on utils.Topic list\n")
 	}
 
 	pubResult = publisher.Stop()
@@ -170,10 +190,15 @@ func TestPublicTopic(t *testing.T) {
 	}
 
 	var event ezmq.Event = utils.GetEvent()
+	byteData := utils.GetByteDataEvent()
+
 	var testingTopic string = ""
 
 	// Empty utils.Topic test
 	if 2 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished on invalid utils.Topic\n")
+	}
+	if 2 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished on invalid utils.Topic\n")
 	}
 
@@ -182,10 +207,16 @@ func TestPublicTopic(t *testing.T) {
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
 
 	// Numeric test
 	testingTopic = "123"
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
 
@@ -194,10 +225,16 @@ func TestPublicTopic(t *testing.T) {
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
 
 	// Alphabet forward slash test
 	testingTopic = "utils.Topic/"
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
 
@@ -206,10 +243,16 @@ func TestPublicTopic(t *testing.T) {
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
 
 	// Alphabet-Numeric, forward slash test
 	testingTopic = "123a/1this3/4jtjos"
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
 
@@ -218,10 +261,16 @@ func TestPublicTopic(t *testing.T) {
 	if 2 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished on invalid utils.Topic\n")
 	}
+	if 2 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished on invalid utils.Topic\n")
+	}
 
 	// Alphabet-Numeric, forward slash and space test
 	testingTopic = "utils.Topic/13/4jtjos/ "
 	if 2 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished on invalid utils.Topic\n")
+	}
+	if 2 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished on invalid utils.Topic\n")
 	}
 
@@ -230,10 +279,16 @@ func TestPublicTopic(t *testing.T) {
 	if 2 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished on invalid utils.Topic\n")
 	}
+	if 2 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished on invalid utils.Topic\n")
+	}
 
 	// Sentence test
 	testingTopic = "This is a utils.Topic"
 	if 2 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished on invalid utils.Topic\n")
+	}
+	if 2 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished on invalid utils.Topic\n")
 	}
 
@@ -242,10 +297,16 @@ func TestPublicTopic(t *testing.T) {
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
 
 	// Topic contain -
 	testingTopic = "utils.Topic/122/livingroom/-"
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
 
@@ -254,10 +315,16 @@ func TestPublicTopic(t *testing.T) {
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
 
 	// Topic contain .
 	testingTopic = "utils.Topic/122.livingroom."
 	if 0 != (publisher.PublishOnTopic(testingTopic, event)) {
+		t.Errorf("\nPublished failed for valid utils.Topic\n")
+	}
+	if 0 != (publisher.PublishOnTopic(testingTopic, byteData)) {
 		t.Errorf("\nPublished failed for valid utils.Topic\n")
 	}
 
@@ -285,16 +352,30 @@ func TestPublishNegative(t *testing.T) {
 	if pubResult == 0 {
 		t.Errorf("\nPublished wrong event\n")
 	}
+	pubResult = publisher.Publish(nil)
+	if pubResult == 0 {
+		t.Errorf("\nPublished nil event\n")
+	}
 	pubResult = publisher.PublishOnTopic(utils.Topic, event)
 	if pubResult == 0 {
 		t.Errorf("\nPublished wrong event\n")
 	}
+	pubResult = publisher.PublishOnTopic(utils.Topic, nil)
+	if pubResult == 0 {
+		t.Errorf("\nPublished wrong event\n")
+	}
+
 	topicList := List.New()
 	e1 := topicList.PushFront("topic1")
 	_ = e1
 	e2 := topicList.PushFront("")
 	_ = e2
 	pubResult = publisher.PublishOnTopicList(*topicList, event)
+	if pubResult == 0 {
+		t.Errorf("\nPublished invalid topiclist\n")
+	}
+	byteData := utils.GetByteDataEvent()
+	pubResult = publisher.PublishOnTopicList(*topicList, byteData)
 	if pubResult == 0 {
 		t.Errorf("\nPublished invalid topiclist\n")
 	}

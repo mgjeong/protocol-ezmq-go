@@ -110,3 +110,10 @@ func TestSerialization(t *testing.T) {
 	//reset the reading
 	covertedReadings[0].Reset()
 }
+
+func TestEventContentType(t *testing.T) {
+	event := utils.GetEvent()
+	if 0 != event.GetContentType() {
+		t.Errorf("\nAssertion failed")
+	}
+}

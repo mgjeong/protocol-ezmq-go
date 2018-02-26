@@ -17,12 +17,12 @@
 
 package ezmq
 
-type EZMQStatusCode int
+type EZMQContentType int
 
-// Constants represents EZMQ Status codes.
+// Constants represents EZMQ content types.
 const (
-	EZMQ_Unknown     = 0
-	EZMQ_Constructed = 1
-	EZMQ_Initialized = 2
-	EZMQ_Terminated  = 3
+	EZMQ_CONTENT_TYPE_PROTOBUF = 0
+	EZMQ_CONTENT_TYPE_BYTEDATA = 1
+	EZMQ_CONTENT_TYPE_AML      = 2 // Not in use as of now
+	EZMQ_CONTENT_TYPE_JSON     = 3 // Not in use as of now
 )

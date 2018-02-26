@@ -90,3 +90,11 @@ func GetWrongEvent() ezmq.Event {
 	event.Reading[0] = reading1
 	return event
 }
+
+func GetByteDataEvent() ezmq.EZMQByteData {
+	var bytes ezmq.EZMQByteData
+	byteArray := [5]byte{0x40, 0x05, 0x10, 0x11, 0x12}
+	bytes.ByteData = byteArray[:]
+	return bytes
+}
+
