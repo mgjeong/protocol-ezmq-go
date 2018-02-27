@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright 2017 Samsung Electronics All Rights Reserved.
+# Copyright 2018 Samsung Electronics All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,15 @@
 ###############################################################################
 
 #!/bin/bash
-cd ./../../../
-PROJECT_ROOT=$(pwd)
-export GOPATH=$(pwd)
-cd "$PROJECT_ROOT/src/go/unittests"
 
-# Run the unit testcases and generate a coverage report
-go test -coverpkg go/ezmq -coverprofile=coverage.out
+PROJECT_ROOT=$(pwd)
+
+#build ezmq module
+./build_auto.sh --target_arch=x86_64 --with_dependencies=true
+
+#Run unit test and code coverage
+echo -e "Build unit testcases"
+cd $PROJECT_ROOT/src/go/unittests
+./build.sh
+
 
