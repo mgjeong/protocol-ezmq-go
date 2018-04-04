@@ -7,8 +7,8 @@ Pre-requisites:
 	> Select posix thread model when asked in intallation setup.
 4) Install libsodium.
 	> Download libsodium-1.0.16-mingw.tar.gz from https://download.libsodium.org/libsodium/releases/
-	> Copy libsodium-win64/include to <mingw_installation>\x86_64-w64-mingw32\lib
-	> Copy libsodium-win64/lib/ to <mingw_installation>\x86_64-w64-mingw32\include
+	> Copy libsodium-win64/include to <mingw_installation>\x86_64-w64-mingw32\include
+	> Copy libsodium-win64/lib/ to <mingw_installation>\x86_64-w64-mingw32\lib
 	#Above copying is required as for now we can not modify zmq makefile to point to appropriate path because of license issue
 5) Update your path variable to point to above 3 installations, Ex in your command prompt: 
 	set PATH=%PATH%;C:\Program Files\mingw-w64\mingw64\bin
