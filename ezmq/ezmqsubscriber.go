@@ -26,6 +26,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+	"strings"
 )
 
 // Address prefix to bind subscriber.
@@ -113,6 +114,9 @@ func parseSocketData(subInstance *EZMQSubscriber) {
 		frame2 = frame1[:]
 	} else {
 		topic = string(frame1[:])
+		if strings.HasSuffix(topic, "/") {
+			topic = topic[:len(topic)-len("/")]
+		} 
 	}
 
 	//Parse header
