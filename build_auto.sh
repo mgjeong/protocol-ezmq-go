@@ -165,7 +165,7 @@ install_dependencies() {
         GOARCH=arm go get -u go.uber.org/zap
         make -j 4
      else
-        echo -e "${BLUE}Installing zmq4, protoc and zap for x86/x86_64${NO_COLOUR}"
+        echo -e "${BLUE}Installing zmq4, protoc and zap for x86/x86_64/armhf-native${NO_COLOUR}"
         go get github.com/pebbe/zmq4
         go get -u github.com/golang/protobuf/protoc-gen-go
         go get -u go.uber.org/zap
@@ -257,6 +257,27 @@ build_armhf() {
     fi
 }
 
+build_armhf_native() {
+    cd $PROJECT_ROOT/src/go/
+    #build ezmq SDK
+    cd ./ezmq
+    if [ "debug" = ${EZMQ_BUILD_MODE} ]; then
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -tags=debug
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a -tags=debug subscriber.go
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a -tags=debug publisher.go
+    else
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go install
+        #build samples
+        cd ../samples
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a subscriber.go
+        CGO_ENABLED=1 GOOS=linux GOARCH=arm go build -a publisher.go
+    fi
+}
+
 build_armhf_qemu() {
     cd $PROJECT_ROOT/src/go/
     #build ezmq SDK
@@ -295,11 +316,11 @@ clean_ezmq() {
 usage() {
     echo -e "${BLUE}Usage:${NO_COLOUR} ./build_auto.sh <option>"
     echo -e "${GREEN}Options:${NO_COLOUR}"
-    echo "  --target_arch=[x86|x86_64|arm|arm64|armhf|armhf-qemu]        :  Choose Target Architecture"
-    echo "  --with_dependencies=(default: false)                         :  Build ezmq along with dependencies [zmq and protobuf]"
-    echo "  --build_mode=[release|debug](default: release)               :  Build ezmq library and samples in release or debug mode"
-    echo "  -c                                                           :  Clean ezmq Repository and its dependencies"
-    echo "  -h / --help                                                  :  Display help and exit [Be careful it will also remove GOPATH:src, pkg and bin]"
+    echo "  --target_arch=[x86|x86_64|arm|arm64|armhf|armhf-qemu|armhf-native] :  Choose Target Architecture"
+    echo "  --with_dependencies=(default: false)                               :  Build ezmq along with dependencies [zmq and protobuf]"
+    echo "  --build_mode=[release|debug](default: release)                     :  Build ezmq library and samples in release or debug mode"
+    echo "  -c                                                                 :  Clean ezmq Repository and its dependencies"
+    echo "  -h / --help                                                        :  Display help and exit [Be careful it will also remove GOPATH:src, pkg and bin]"
     echo -e "${GREEN}Examples: ${NO_COLOUR}"
     echo -e "${BLUE}  build:-${NO_COLOUR}"
     echo "  $ ./build_auto.sh --target_arch=x86_64"
@@ -354,6 +375,8 @@ build_ezmq() {
          build_armhf;
          echo -e "${GREEN}Build done${NO_COLOUR}"
          exit 0;
+    elif [ "armhf-native" = ${EZMQ_TARGET_ARCH} ]; then
+         build_armhf_native; exit 0;
     elif [ "armhf-qemu" = ${EZMQ_TARGET_ARCH} ]; then
          build_armhf_qemu; exit 0;
     else
