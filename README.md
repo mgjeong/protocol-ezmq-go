@@ -9,9 +9,9 @@ and serialization / deserialization middlewares along with some added functional
 
 ## Prerequisites ##
  - You must install basic prerequisites for build
-   - Install build-essential
+   - Make sure that libtool, pkg-config, build-essential, autoconf, and automake are installed.
       ```
-      $ sudo apt-get install build-essential
+      $ sudo apt-get install libtool pkg-config build-essential autoconf automake
       ```
 - Python
   - Version : 2.4 to 3.0
