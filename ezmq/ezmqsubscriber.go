@@ -25,8 +25,8 @@ import (
 	List "container/list"
 	"math/rand"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 // Address prefix to bind subscriber.
@@ -116,7 +116,7 @@ func parseSocketData(subInstance *EZMQSubscriber) {
 		topic = string(frame1[:])
 		if strings.HasSuffix(topic, "/") {
 			topic = topic[:len(topic)-len("/")]
-		} 
+		}
 	}
 
 	//Parse header
@@ -288,6 +288,43 @@ func (subInstance *EZMQSubscriber) SubscribeForTopicList(topicList List.List) EZ
 			return result
 		}
 	}
+	return EZMQ_OK
+}
+
+// Subscribe for event/messages from given IP:Port on the given topic.
+//
+// Note:
+// (1) It will be using same Subscriber socket for connecting to given ip:port.
+// (2) To un-subcribe use un-subscribe API with the same topic.
+// (3) Topic name should be as path format. For example:home/livingroom/
+// (4) Topic name can have letters [a-z, A-z], numeric [0-9] and special characters _ - / and .
+// (5) Topic will be appended with forward slash [/] in case, if application has not appended it.
+func (subInstance *EZMQSubscriber) SubscribeWithIPPort(ip string, port int, topic string) EZMQErrorCode {
+	if port < 0 {
+		return EZMQ_ERROR
+	}
+	//validate the topic
+	validTopic := sanitizeTopic(topic)
+	if validTopic == "" {
+		return EZMQ_INVALID_TOPIC
+	}
+	if nil == subInstance.subscriber {
+		logger.Error("subscriber is null")
+		return EZMQ_ERROR
+	}
+	address := getSubSocketAddress(ip, port)
+	err := subInstance.subscriber.Connect(address)
+	if nil != err {
+		logger.Error("Subscriber Socket connect failed")
+		return EZMQ_ERROR
+	}
+	logger.Debug("Connected subscriber", zap.String("Address", address))
+	err = subInstance.subscriber.SetSubscribe(validTopic)
+	if nil != err {
+		logger.Error("SubscribeWithIPPort error occured")
+		return EZMQ_ERROR
+	}
+	logger.Debug("subscribed for events with ip ports", zap.String("Topic", validTopic))
 	return EZMQ_OK
 }
 
