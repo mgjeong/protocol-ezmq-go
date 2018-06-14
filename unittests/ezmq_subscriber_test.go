@@ -360,6 +360,29 @@ func TestUnSubscribeNegative(t *testing.T) {
 	}
 }
 
+func TestSubscriberIPPort(t *testing.T)  {
+	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
+	if nil == subscriber {
+		t.Errorf("\nSubscriber instance is NULL")
+	}
+	subResult = subscriber.Start()
+	if subResult != 0 {
+		t.Errorf("\nError while starting subscriber\n")
+	}
+	subResult = subscriber.SubscribeWithIPPort("192.168.1.1", 5562, utils.Topic)
+	if subResult != 0 {
+		t.Errorf("\nError while subscribing\n")
+	}
+	subResult = subscriber.SubscribeWithIPPort("192.168.1.1", -1, "")
+	if subResult != 1 {
+		t.Errorf("\nReturned wrong value\n")
+	}
+	subResult = subscriber.SubscribeWithIPPort("192.168.1.1", 5562, "")
+	if subResult != 2 {
+		t.Errorf("\nReturned wrong value\n")
+	}
+}
+
 func TestSubStartStop(t *testing.T) {
 	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
 	if nil == subscriber {
