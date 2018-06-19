@@ -67,7 +67,7 @@ func GetEZMQPublisher(port int, startCallback EZMQStartCB, stopCallback EZMQStop
 	instance.startCallback = startCallback
 	instance.stopCallback = stopCallback
 	instance.errorCallback = errorCallback
-	instance.context = GetInstance().getContext()
+	instance.context = GetInstance().GetContext()
 
 	if nil == instance.context {
 		logger.Error("Context is null")

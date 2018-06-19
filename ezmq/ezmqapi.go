@@ -81,6 +81,6 @@ func (ezmqInstance *EZMQAPI) GetStatus() EZMQStatusCode {
 	return ezmqInstance.status
 }
 
-func (ezmqInstance *EZMQAPI) getContext() *zmq.Context {
+func (ezmqInstance *EZMQAPI) GetContext() *zmq.Context {
 	return ezmqInstance.context
 }
