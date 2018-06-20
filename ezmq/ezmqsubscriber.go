@@ -64,7 +64,7 @@ func GetEZMQSubscriber(ip string, port int, subCallback EZMQSubCB, subTopicCallb
 	instance.port = port
 	instance.subCallback = subCallback
 	instance.subTopicCallback = subTopicCallback
-	instance.context = GetInstance().getContext()
+	instance.context = GetInstance().GetContext()
 	InitLogger()
 	if nil == instance.context {
 		logger.Error("Context is null")
