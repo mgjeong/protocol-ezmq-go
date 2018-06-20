@@ -1,6 +1,6 @@
 # ezmq library (go)
 
-protocol-ezmq-java is a library (jar) which provides a standard messaging interface over various data streaming
+protocol-ezmq-go is a go package which provides a standard messaging interface over various data streaming
 and serialization / deserialization middlewares along with some added functionalities.</br>
   - Currently supports streaming using 0mq and serialization / deserialization using protobuf.
   - Publisher -> Multiple Subscribers broadcasting.
@@ -30,10 +30,10 @@ and serialization / deserialization middlewares along with some added functional
 1. Goto: ~/protocol-ezmq-go/</br>
 2. Run the script:
    ```
-   ./build.sh <options>
+   ./build_auto.sh <options>
    ```
 **Notes:** </br>
-(a) For getting help about script option: **$ ./build.sh --help** </br>
+(a) For getting help about script option: **$ ./build_auto.sh --help** </br>
 (b) Currently, Script needs sudo permission for installing zeroMQ and protobuf libraries. In future need for sudo will be removed by installing those libraries in ezmq library.
 (c) While doing cross compilation, permission denied error may come.</br>
       **For example:** The below error while building for armhf:</br>
