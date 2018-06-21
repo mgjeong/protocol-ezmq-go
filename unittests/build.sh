@@ -22,5 +22,5 @@ export GOPATH=$(pwd)
 cd "$PROJECT_ROOT/src/go/unittests"
 
 # Run the unit testcases and generate a coverage report
-go test -coverpkg go/ezmq -coverprofile=coverage.out
+go test -v -coverpkg go/ezmq -coverprofile=coverage.out
 
