@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -57,6 +58,7 @@ type EZMQPublisher struct {
 
 	publisher *zmq.Socket
 	context   *zmq.Context
+	mutex     *sync.Mutex
 }
 
 // Contructs EZMQPublisher.
@@ -74,6 +76,7 @@ func GetEZMQPublisher(port int, startCallback EZMQStartCB, stopCallback EZMQStop
 		return nil
 	}
 	instance.publisher = nil
+	instance.mutex = &sync.Mutex{}
 	InitLogger()
 	return instance
 }
@@ -85,6 +88,8 @@ func (pubInstance *EZMQPublisher) Start() EZMQErrorCode {
 		return EZMQ_ERROR
 	}
 
+	pubInstance.mutex.Lock()
+	defer pubInstance.mutex.Unlock()
 	if nil == pubInstance.publisher {
 		var err error
 		pubInstance.publisher, err = instance.context.NewSocket(zmq.PUB)
@@ -119,7 +124,6 @@ func getHeader(content EZMQContentType) []byte {
 }
 
 func (pubInstance *EZMQPublisher) publishInternal(topic string, ezmqMsg EZMQMessage) EZMQErrorCode {
-
 	if nil == ezmqMsg {
 		return EZMQ_ERROR
 	}
@@ -150,6 +154,12 @@ func (pubInstance *EZMQPublisher) publishInternal(topic string, ezmqMsg EZMQMess
 		return EZMQ_ERROR
 	}
 
+	pubInstance.mutex.Lock()
+	defer pubInstance.mutex.Unlock()
+	if nil == pubInstance.publisher {
+		logger.Error("Publisher is nil")
+		return EZMQ_ERROR
+	}
 	// send topic [if any]
 	if topic != "" {
 		result, err := pubInstance.publisher.Send(topic, zmq.SNDMORE)
@@ -225,11 +235,13 @@ func (pubInstance *EZMQPublisher) PublishOnTopicList(topicList List.List, ezmqMs
 
 // Stops PUB instance.
 func (pubInstance *EZMQPublisher) Stop() EZMQErrorCode {
+	pubInstance.mutex.Lock()
+	defer pubInstance.mutex.Unlock()
+
 	if nil == pubInstance.publisher {
 		logger.Error("Publisher is null")
 		return EZMQ_ERROR
 	}
-
 	// Sync close
 	result := pubInstance.syncClose()
 	if result == EZMQ_OK {
