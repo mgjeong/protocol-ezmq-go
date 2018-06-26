@@ -26,6 +26,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -45,6 +46,7 @@ type EZMQSubscriber struct {
 	port             int
 	subCallback      EZMQSubCB
 	subTopicCallback EZMQSubTopicCB
+	mutex            *sync.Mutex
 
 	context        *zmq.Context
 	subscriber     *zmq.Socket
@@ -76,6 +78,7 @@ func GetEZMQSubscriber(ip string, port int, subCallback EZMQSubCB, subTopicCallb
 	instance.poller = nil
 	instance.shutdownChan = nil
 	instance.isReceiverStarted = false
+	instance.mutex = &sync.Mutex{}
 	return instance
 }
 
@@ -90,11 +93,12 @@ func parseSocketData(subInstance *EZMQSubscriber) {
 	var more bool = false
 	var err error
 
+	subInstance.mutex.Lock()
+	defer subInstance.mutex.Unlock()
 	if nil == subInstance.subscriber {
 		logger.Error("subscriber is null")
 		return
 	}
-
 	frame1, err = subInstance.subscriber.RecvBytes(0)
 	if err == nil {
 		more, _ = subInstance.subscriber.GetRcvmore()
@@ -153,7 +157,7 @@ func receive(subInstance *EZMQSubscriber) {
 	var soc *zmq.Socket
 	var err error
 
-	for {
+	for subInstance.poller != nil {
 		sockets, err = subInstance.poller.Poll(-1)
 		if err == nil {
 			for _, socket = range sockets {
@@ -183,6 +187,8 @@ func (subInstance *EZMQSubscriber) Start() EZMQErrorCode {
 
 	var err error
 	var address = getInProcUniqueAddress()
+	subInstance.mutex.Lock()
+	defer subInstance.mutex.Unlock()
 	if nil == subInstance.shutdownServer {
 		subInstance.shutdownServer, err = zmq.NewSocket(zmq.PAIR)
 		if nil != err {
@@ -241,6 +247,9 @@ func (subInstance *EZMQSubscriber) Start() EZMQErrorCode {
 }
 
 func (subInstance *EZMQSubscriber) subscribeInternal(topic string) EZMQErrorCode {
+	subInstance.mutex.Lock()
+	defer subInstance.mutex.Unlock()
+
 	if nil != subInstance.subscriber {
 		err := subInstance.subscriber.SetSubscribe(topic)
 		if nil != err {
@@ -308,6 +317,8 @@ func (subInstance *EZMQSubscriber) SubscribeWithIPPort(ip string, port int, topi
 	if validTopic == "" {
 		return EZMQ_INVALID_TOPIC
 	}
+	subInstance.mutex.Lock()
+	defer subInstance.mutex.Unlock()
 	if nil == subInstance.subscriber {
 		logger.Error("subscriber is null")
 		return EZMQ_ERROR
@@ -329,6 +340,8 @@ func (subInstance *EZMQSubscriber) SubscribeWithIPPort(ip string, port int, topi
 }
 
 func (subInstance *EZMQSubscriber) unSubscribeInternal(topic string) EZMQErrorCode {
+	subInstance.mutex.Lock()
+	defer subInstance.mutex.Unlock()
 	if nil != subInstance.subscriber {
 		err := subInstance.subscriber.SetUnsubscribe(topic)
 		if nil != err {
@@ -383,6 +396,8 @@ func (subInstance *EZMQSubscriber) UnSubscribeForTopicList(topicList List.List) 
 
 // Stops SUB instance.
 func (subInstance *EZMQSubscriber) Stop() EZMQErrorCode {
+	subInstance.mutex.Lock()
+	defer subInstance.mutex.Unlock()
 	if nil != subInstance.shutdownServer && subInstance.isReceiverStarted == true {
 		subInstance.shutdownChan = make(chan string)
 		timeout := make(chan bool, 1)
