@@ -72,6 +72,9 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 				
 				
 					
+					<dd>&nbsp; &nbsp; <a href="#EZMQAPI.GetContext">func (ezmqInstance *EZMQAPI) GetContext() *zmq.Context</a></dd>
+				
+					
 					<dd>&nbsp; &nbsp; <a href="#EZMQAPI.GetStatus">func (ezmqInstance *EZMQAPI) GetStatus() EZMQStatusCode</a></dd>
 				
 					
@@ -82,12 +85,36 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 				
 			
 				
+				<dd><a href="#EZMQByteData">type EZMQByteData</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EZMQByteData.GetByteData">func (dataInstance *EZMQByteData) GetByteData() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EZMQByteData.GetContentType">func (dataInstance EZMQByteData) GetContentType() EZMQContentType</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EZMQByteData.SetByteData">func (dataInstance *EZMQByteData) SetByteData(byteData []byte) EZMQErrorCode</a></dd>
+				
+			
+				
+				<dd><a href="#EZMQContentType">type EZMQContentType</a></dd>
+				
+				
+			
+				
 				<dd><a href="#EZMQErrorCB">type EZMQErrorCB</a></dd>
 				
 				
 			
 				
 				<dd><a href="#EZMQErrorCode">type EZMQErrorCode</a></dd>
+				
+				
+			
+				
+				<dd><a href="#EZMQMessage">type EZMQMessage</a></dd>
 				
 				
 			
@@ -102,13 +129,13 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.GetPort">func (pubInstance *EZMQPublisher) GetPort() int</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.Publish">func (pubInstance *EZMQPublisher) Publish(event Event) EZMQErrorCode</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.Publish">func (pubInstance *EZMQPublisher) Publish(ezmqMsg EZMQMessage) EZMQErrorCode</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.PublishOnTopic">func (pubInstance *EZMQPublisher) PublishOnTopic(topic string, event Event) EZMQErrorCode</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.PublishOnTopic">func (pubInstance *EZMQPublisher) PublishOnTopic(topic string, ezmqMsg EZMQMessage) EZMQErrorCode</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.PublishOnTopicList">func (pubInstance *EZMQPublisher) PublishOnTopicList(topicList List.List, event Event) EZMQErrorCode</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.PublishOnTopicList">func (pubInstance *EZMQPublisher) PublishOnTopicList(topicList List.List, ezmqMsg EZMQMessage) EZMQErrorCode</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#EZMQPublisher.Start">func (pubInstance *EZMQPublisher) Start() EZMQErrorCode</a></dd>
@@ -171,6 +198,9 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 					<dd>&nbsp; &nbsp; <a href="#EZMQSubscriber.SubscribeForTopicList">func (subInstance *EZMQSubscriber) SubscribeForTopicList(topicList List.List) EZMQErrorCode</a></dd>
 				
 					
+					<dd>&nbsp; &nbsp; <a href="#EZMQSubscriber.SubscribeWithIPPort">func (subInstance *EZMQSubscriber) SubscribeWithIPPort(ip string, port int, topic string) EZMQErrorCode</a></dd>
+				
+					
 					<dd>&nbsp; &nbsp; <a href="#EZMQSubscriber.UnSubscribe">func (subInstance *EZMQSubscriber) UnSubscribe() EZMQErrorCode</a></dd>
 				
 					
@@ -186,6 +216,9 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Event.Descriptor">func (*Event) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Event.GetContentType">func (m Event) GetContentType() EZMQContentType</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Event.GetCreated">func (m *Event) GetCreated() int64</a></dd>
@@ -274,9 +307,15 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 			
 				<a href="/src/go/ezmq/ezmqapi.go">ezmqapi.go</a>
 			
+				<a href="/src/go/ezmq/ezmqbytedata.go">ezmqbytedata.go</a>
+			
+				<a href="/src/go/ezmq/ezmqcontenttype.go">ezmqcontenttype.go</a>
+			
 				<a href="/src/go/ezmq/ezmqerrorcode.go">ezmqerrorcode.go</a>
 			
-				<a href="/src/go/ezmq/ezmqlogger.go">ezmqlogger.go</a>
+				<a href="/src/go/ezmq/ezmqlogger_release.go">ezmqlogger_release.go</a>
+			
+				<a href="/src/go/ezmq/ezmqmessage.go">ezmqmessage.go</a>
 			
 				<a href="/src/go/ezmq/ezmqpublisher.go">ezmqpublisher.go</a>
 			
@@ -331,13 +370,25 @@ EZMQ package which provides simplified APIs for Publisher and Subscriber.
 			<h2 id="pkg-constants">Constants</h2>
 			
 				<p>
+Constants represents EZMQ content types.
+</p>
+
+				<pre>const (
+    <span id="EZMQ_CONTENT_TYPE_PROTOBUF">EZMQ_CONTENT_TYPE_PROTOBUF</span> = 0
+    <span id="EZMQ_CONTENT_TYPE_BYTEDATA">EZMQ_CONTENT_TYPE_BYTEDATA</span> = 1
+    <span id="EZMQ_CONTENT_TYPE_AML">EZMQ_CONTENT_TYPE_AML</span>      = 2 <span class="comment">// Not in use as of now</span>
+    <span id="EZMQ_CONTENT_TYPE_JSON">EZMQ_CONTENT_TYPE_JSON</span>     = 3 <span class="comment">// Not in use as of now</span>
+)</pre>
+			
+				<p>
 Constants represents EZMQ error codes.
 </p>
 
 				<pre>const (
-    <span id="EZMQ_OK">EZMQ_OK</span>            = 0
-    <span id="EZMQ_ERROR">EZMQ_ERROR</span>         = 1
-    <span id="EZMQ_INVALID_TOPIC">EZMQ_INVALID_TOPIC</span> = 2
+    <span id="EZMQ_OK">EZMQ_OK</span>                   = 0
+    <span id="EZMQ_ERROR">EZMQ_ERROR</span>                = 1
+    <span id="EZMQ_INVALID_TOPIC">EZMQ_INVALID_TOPIC</span>        = 2
+    <span id="EZMQ_INVALID_CONTENT_TYPE">EZMQ_INVALID_CONTENT_TYPE</span> = 3
 )</pre>
 			
 				<p>
@@ -377,7 +428,7 @@ Regex Pattern for Topic validation.
 		
 			
 			
-			<h2 id="InitLogger">func <a href="/src/target/ezmqlogger.go?s=884:901#L18">InitLogger</a>
+			<h2 id="InitLogger">func <a href="/src/target/ezmqlogger_release.go?s=95:112#L3">InitLogger</a>
 				<a class="permalink" href="#InitLogger">&#xb6;</a>
 			</h2>
 			<pre>func InitLogger()</pre>
@@ -389,7 +440,7 @@ Regex Pattern for Topic validation.
 		
 			
 			
-			<h2 id="EZMQAPI">type <a href="/src/target/ezmqapi.go?s=994:1066#L19">EZMQAPI</a>
+			<h2 id="EZMQAPI">type <a href="/src/target/ezmqapi.go?s=966:1035#L19">EZMQAPI</a>
 				<a class="permalink" href="#EZMQAPI">&#xb6;</a>
 			</h2>
 			<p>
@@ -410,7 +461,7 @@ Structure represents EZMQAPI
 
 			
 				
-				<h3 id="GetInstance">func <a href="/src/target/ezmqapi.go?s=1121:1148#L27">GetInstance</a>
+				<h3 id="GetInstance">func <a href="/src/target/ezmqapi.go?s=1085:1112#L27">GetInstance</a>
 					<a class="permalink" href="#GetInstance">&#xb6;</a>
 				</h3>
 				<pre>func GetInstance() *<a href="#EZMQAPI">EZMQAPI</a></pre>
@@ -424,7 +475,17 @@ Get EZMQAPI instance.
 
 			
 				
-				<h3 id="EZMQAPI.GetStatus">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=2194:2249#L70">GetStatus</a>
+				<h3 id="EZMQAPI.GetContext">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=2204:2258#L74">GetContext</a>
+					<a class="permalink" href="#EZMQAPI.GetContext">&#xb6;</a>
+				</h3>
+				<pre>func (ezmqInstance *<a href="#EZMQAPI">EZMQAPI</a>) GetContext() *<a href="/pkg/github.com/pebbe/zmq4/">zmq</a>.<a href="/pkg/github.com/pebbe/zmq4/#Context">Context</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="EZMQAPI.GetStatus">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=2115:2170#L70">GetStatus</a>
 					<a class="permalink" href="#EZMQAPI.GetStatus">&#xb6;</a>
 				</h3>
 				<pre>func (ezmqInstance *<a href="#EZMQAPI">EZMQAPI</a>) GetStatus() <a href="#EZMQStatusCode">EZMQStatusCode</a></pre>
@@ -434,7 +495,7 @@ Get EZMQAPI instance.
 				
 			
 				
-				<h3 id="EZMQAPI.Initialize">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=1423:1478#L39">Initialize</a>
+				<h3 id="EZMQAPI.Initialize">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=1375:1430#L39">Initialize</a>
 					<a class="permalink" href="#EZMQAPI.Initialize">&#xb6;</a>
 				</h3>
 				<pre>func (ezmqInstance *<a href="#EZMQAPI">EZMQAPI</a>) Initialize() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -448,7 +509,7 @@ before using any EZMQ APIs.
 				
 			
 				
-				<h3 id="EZMQAPI.Terminate">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=1842:1896#L56">Terminate</a>
+				<h3 id="EZMQAPI.Terminate">func (*EZMQAPI) <a href="/src/target/ezmqapi.go?s=1777:1831#L56">Terminate</a>
 					<a class="permalink" href="#EZMQAPI.Terminate">&#xb6;</a>
 				</h3>
 				<pre>func (ezmqInstance *<a href="#EZMQAPI">EZMQAPI</a>) Terminate() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -463,7 +524,91 @@ Perform cleanup of EZMQ components.
 		
 			
 			
-			<h2 id="EZMQErrorCB">type <a href="/src/target/ezmqpublisher.go?s=1519:1560#L39">EZMQErrorCB</a>
+			<h2 id="EZMQByteData">type <a href="/src/target/ezmqbytedata.go?s=831:876#L11">EZMQByteData</a>
+				<a class="permalink" href="#EZMQByteData">&#xb6;</a>
+			</h2>
+			<p>
+Structure represents EZMQByteData.
+</p>
+
+			<pre>type EZMQByteData struct {
+<span id="EZMQByteData.ByteData"></span>    ByteData []<a href="/pkg/builtin/#byte">byte</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="EZMQByteData.GetByteData">func (*EZMQByteData) <a href="/src/target/ezmqbytedata.go?s=895:949#L16">GetByteData</a>
+					<a class="permalink" href="#EZMQByteData.GetByteData">&#xb6;</a>
+				</h3>
+				<pre>func (dataInstance *<a href="#EZMQByteData">EZMQByteData</a>) GetByteData() []<a href="/pkg/builtin/#byte">byte</a></pre>
+				<p>
+Get byte data
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="EZMQByteData.GetContentType">func (EZMQByteData) <a href="/src/target/ezmqbytedata.go?s=1197:1262#L30">GetContentType</a>
+					<a class="permalink" href="#EZMQByteData.GetContentType">&#xb6;</a>
+				</h3>
+				<pre>func (dataInstance <a href="#EZMQByteData">EZMQByteData</a>) GetContentType() <a href="#EZMQContentType">EZMQContentType</a></pre>
+				<p>
+Get Content type
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="EZMQByteData.SetByteData">func (*EZMQByteData) <a href="/src/target/ezmqbytedata.go?s=1001:1077#L21">SetByteData</a>
+					<a class="permalink" href="#EZMQByteData.SetByteData">&#xb6;</a>
+				</h3>
+				<pre>func (dataInstance *<a href="#EZMQByteData">EZMQByteData</a>) SetByteData(byteData []<a href="/pkg/builtin/#byte">byte</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
+				<p>
+set byte data
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="EZMQContentType">type <a href="/src/target/ezmqcontenttype.go?s=794:818#L10">EZMQContentType</a>
+				<a class="permalink" href="#EZMQContentType">&#xb6;</a>
+			</h2>
+			
+			<pre>type EZMQContentType <a href="/pkg/builtin/#int">int</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="EZMQErrorCB">type <a href="/src/target/ezmqpublisher.go?s=1479:1520#L40">EZMQErrorCB</a>
 				<a class="permalink" href="#EZMQErrorCB">&#xb6;</a>
 			</h2>
 			<p>
@@ -487,7 +632,7 @@ Error Callback for start/stop of EZMQ publisher.
 		
 			
 			
-			<h2 id="EZMQErrorCode">type <a href="/src/target/ezmqerrorcode.go?s=813:835#L10">EZMQErrorCode</a>
+			<h2 id="EZMQErrorCode">type <a href="/src/target/ezmqerrorcode.go?s=794:816#L10">EZMQErrorCode</a>
 				<a class="permalink" href="#EZMQErrorCode">&#xb6;</a>
 			</h2>
 			
@@ -507,7 +652,32 @@ Error Callback for start/stop of EZMQ publisher.
 		
 			
 			
-			<h2 id="EZMQPublisher">type <a href="/src/target/ezmqpublisher.go?s=1603:1787#L42">EZMQPublisher</a>
+			<h2 id="EZMQMessage">type <a href="/src/target/ezmqmessage.go?s=824:888#L11">EZMQMessage</a>
+				<a class="permalink" href="#EZMQMessage">&#xb6;</a>
+			</h2>
+			<p>
+Interface for ezmq message.
+</p>
+
+			<pre>type EZMQMessage interface {
+    GetContentType() <a href="#EZMQContentType">EZMQContentType</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="EZMQPublisher">type <a href="/src/target/ezmqpublisher.go?s=1560:1759#L43">EZMQPublisher</a>
 				<a class="permalink" href="#EZMQPublisher">&#xb6;</a>
 			</h2>
 			<p>
@@ -528,7 +698,7 @@ Structure represents EZMQPublisher.
 
 			
 				
-				<h3 id="GetEZMQPublisher">func <a href="/src/target/ezmqpublisher.go?s=1820:1945#L53">GetEZMQPublisher</a>
+				<h3 id="GetEZMQPublisher">func <a href="/src/target/ezmqpublisher.go?s=1789:1914#L55">GetEZMQPublisher</a>
 					<a class="permalink" href="#GetEZMQPublisher">&#xb6;</a>
 				</h3>
 				<pre>func GetEZMQPublisher(port <a href="/pkg/builtin/#int">int</a>, startCallback <a href="#EZMQStartCB">EZMQStartCB</a>, stopCallback <a href="#EZMQStopCB">EZMQStopCB</a>, errorCallback <a href="#EZMQErrorCB">EZMQErrorCB</a>) *<a href="#EZMQPublisher">EZMQPublisher</a></pre>
@@ -542,7 +712,7 @@ Contructs EZMQPublisher.
 
 			
 				
-				<h3 id="EZMQPublisher.GetPort">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=5966:6013#L193">GetPort</a>
+				<h3 id="EZMQPublisher.GetPort">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=7106:7153#L245">GetPort</a>
 					<a class="permalink" href="#EZMQPublisher.GetPort">&#xb6;</a>
 				</h3>
 				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) GetPort() <a href="/pkg/builtin/#int">int</a></pre>
@@ -555,10 +725,10 @@ Get publisher port.
 				
 			
 				
-				<h3 id="EZMQPublisher.Publish">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=3111:3179#L97">Publish</a>
+				<h3 id="EZMQPublisher.Publish">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=5144:5220#L180">Publish</a>
 					<a class="permalink" href="#EZMQPublisher.Publish">&#xb6;</a>
 				</h3>
-				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) Publish(event <a href="#Event">Event</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
+				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) Publish(ezmqMsg <a href="#EZMQMessage">EZMQMessage</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
 				<p>
 Publish events on the socket for subscribers.
 </p>
@@ -568,10 +738,10 @@ Publish events on the socket for subscribers.
 				
 			
 				
-				<h3 id="EZMQPublisher.PublishOnTopic">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=3969:4058#L124">PublishOnTopic</a>
+				<h3 id="EZMQPublisher.PublishOnTopic">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=5616:5713#L193">PublishOnTopic</a>
 					<a class="permalink" href="#EZMQPublisher.PublishOnTopic">&#xb6;</a>
 				</h3>
-				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) PublishOnTopic(topic <a href="/pkg/builtin/#string">string</a>, event <a href="#Event">Event</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
+				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) PublishOnTopic(topic <a href="/pkg/builtin/#string">string</a>, ezmqMsg <a href="#EZMQMessage">EZMQMessage</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
 				<p>
 Publish events on a specific topic on socket for subscribers.
 </p>
@@ -586,10 +756,10 @@ Note:
 				
 			
 				
-				<h3 id="EZMQPublisher.PublishOnTopicList">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=5206:5306#L163">PublishOnTopicList</a>
+				<h3 id="EZMQPublisher.PublishOnTopicList">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=6306:6414#L213">PublishOnTopicList</a>
 					<a class="permalink" href="#EZMQPublisher.PublishOnTopicList">&#xb6;</a>
 				</h3>
-				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) PublishOnTopicList(topicList <a href="/pkg/container/list/">List</a>.<a href="/pkg/container/list/#List">List</a>, event <a href="#Event">Event</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
+				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) PublishOnTopicList(topicList <a href="/pkg/container/list/">List</a>.<a href="/pkg/container/list/#List">List</a>, ezmqMsg <a href="#EZMQMessage">EZMQMessage</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
 				<p>
 Publish an events on list of topics on socket for subscribers. On any of
 the topic in list, if it failed to publish event it will return
@@ -606,7 +776,7 @@ Note:
 				
 			
 				
-				<h3 id="EZMQPublisher.Start">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=2377:2432#L72">Start</a>
+				<h3 id="EZMQPublisher.Start">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=2359:2414#L75">Start</a>
 					<a class="permalink" href="#EZMQPublisher.Start">&#xb6;</a>
 				</h3>
 				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) Start() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -619,7 +789,7 @@ Starts PUB instance.
 				
 			
 				
-				<h3 id="EZMQPublisher.Stop">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=5614:5668#L177">Stop</a>
+				<h3 id="EZMQPublisher.Stop">func (*EZMQPublisher) <a href="/src/target/ezmqpublisher.go?s=6710:6764#L227">Stop</a>
 					<a class="permalink" href="#EZMQPublisher.Stop">&#xb6;</a>
 				</h3>
 				<pre>func (pubInstance *<a href="#EZMQPublisher">EZMQPublisher</a>) Stop() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -634,7 +804,7 @@ Stops PUB instance.
 		
 			
 			
-			<h2 id="EZMQStartCB">type <a href="/src/target/ezmqpublisher.go?s=1254:1295#L31">EZMQStartCB</a>
+			<h2 id="EZMQStartCB">type <a href="/src/target/ezmqpublisher.go?s=1222:1263#L32">EZMQStartCB</a>
 				<a class="permalink" href="#EZMQStartCB">&#xb6;</a>
 			</h2>
 			<p>
@@ -658,7 +828,7 @@ Callback to get error code for start of EZMQ publisher.
 		
 			
 			
-			<h2 id="EZMQStatusCode">type <a href="/src/target/ezmqstatuscode.go?s=814:837#L10">EZMQStatusCode</a>
+			<h2 id="EZMQStatusCode">type <a href="/src/target/ezmqstatuscode.go?s=794:817#L10">EZMQStatusCode</a>
 				<a class="permalink" href="#EZMQStatusCode">&#xb6;</a>
 			</h2>
 			
@@ -678,7 +848,7 @@ Callback to get error code for start of EZMQ publisher.
 		
 			
 			
-			<h2 id="EZMQStopCB">type <a href="/src/target/ezmqpublisher.go?s=1390:1430#L35">EZMQStopCB</a>
+			<h2 id="EZMQStopCB">type <a href="/src/target/ezmqpublisher.go?s=1354:1394#L36">EZMQStopCB</a>
 				<a class="permalink" href="#EZMQStopCB">&#xb6;</a>
 			</h2>
 			<p>
@@ -702,14 +872,14 @@ Callback to get error code for stop of EZMQ publisher.
 		
 			
 			
-			<h2 id="EZMQSubCB">type <a href="/src/target/ezmqsubscriber.go?s=1147:1179#L26">EZMQSubCB</a>
+			<h2 id="EZMQSubCB">type <a href="/src/target/ezmqsubscriber.go?s=1131:1169#L28">EZMQSubCB</a>
 				<a class="permalink" href="#EZMQSubCB">&#xb6;</a>
 			</h2>
 			<p>
 Callback to get all the subscribed events.
 </p>
 
-			<pre>type EZMQSubCB func(event <a href="#Event">Event</a>)</pre>
+			<pre>type EZMQSubCB func(event <a href="#EZMQMessage">EZMQMessage</a>)</pre>
 
 			
 
@@ -725,14 +895,14 @@ Callback to get all the subscribed events.
 		
 			
 			
-			<h2 id="EZMQSubTopicCB">type <a href="/src/target/ezmqsubscriber.go?s=1251:1302#L29">EZMQSubTopicCB</a>
+			<h2 id="EZMQSubTopicCB">type <a href="/src/target/ezmqsubscriber.go?s=1238:1295#L31">EZMQSubTopicCB</a>
 				<a class="permalink" href="#EZMQSubTopicCB">&#xb6;</a>
 			</h2>
 			<p>
 Callback to get all the subscribed events for a specific topic.
 </p>
 
-			<pre>type EZMQSubTopicCB func(topic <a href="/pkg/builtin/#string">string</a>, event <a href="#Event">Event</a>)</pre>
+			<pre>type EZMQSubTopicCB func(topic <a href="/pkg/builtin/#string">string</a>, event <a href="#EZMQMessage">EZMQMessage</a>)</pre>
 
 			
 
@@ -748,7 +918,7 @@ Callback to get all the subscribed events for a specific topic.
 		
 			
 			
-			<h2 id="EZMQSubscriber">type <a href="/src/target/ezmqsubscriber.go?s=1347:1694#L32">EZMQSubscriber</a>
+			<h2 id="EZMQSubscriber">type <a href="/src/target/ezmqsubscriber.go?s=1337:1700#L34">EZMQSubscriber</a>
 				<a class="permalink" href="#EZMQSubscriber">&#xb6;</a>
 			</h2>
 			<p>
@@ -769,7 +939,7 @@ Structure represents EZMQSubscriber.
 
 			
 				
-				<h3 id="GetEZMQSubscriber">func <a href="/src/target/ezmqsubscriber.go?s=1728:1843#L49">GetEZMQSubscriber</a>
+				<h3 id="GetEZMQSubscriber">func <a href="/src/target/ezmqsubscriber.go?s=1731:1846#L52">GetEZMQSubscriber</a>
 					<a class="permalink" href="#GetEZMQSubscriber">&#xb6;</a>
 				</h3>
 				<pre>func GetEZMQSubscriber(ip <a href="/pkg/builtin/#string">string</a>, port <a href="/pkg/builtin/#int">int</a>, subCallback <a href="#EZMQSubCB">EZMQSubCB</a>, subTopicCallback <a href="#EZMQSubTopicCB">EZMQSubTopicCB</a>) *<a href="#EZMQSubscriber">EZMQSubscriber</a></pre>
@@ -783,7 +953,7 @@ Contructs EZMQSubscriber.
 
 			
 				
-				<h3 id="EZMQSubscriber.GetIP">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=10963:11012#L361">GetIP</a>
+				<h3 id="EZMQSubscriber.GetIP">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=13229:13278#L451">GetIP</a>
 					<a class="permalink" href="#EZMQSubscriber.GetIP">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) GetIP() <a href="/pkg/builtin/#string">string</a></pre>
@@ -796,7 +966,7 @@ Get Ip of publisher to which subscribed.
 				
 			
 				
-				<h3 id="EZMQSubscriber.GetPort">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=11092:11140#L366">GetPort</a>
+				<h3 id="EZMQSubscriber.GetPort">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=13353:13401#L456">GetPort</a>
 					<a class="permalink" href="#EZMQSubscriber.GetPort">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) GetPort() <a href="/pkg/builtin/#int">int</a></pre>
@@ -809,7 +979,7 @@ Get Port of publisher to which subscribed.
 				
 			
 				
-				<h3 id="EZMQSubscriber.Start">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=3820:3876#L130">Start</a>
+				<h3 id="EZMQSubscriber.Start">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=4667:4723#L172">Start</a>
 					<a class="permalink" href="#EZMQSubscriber.Start">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) Start() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -822,7 +992,7 @@ Starts SUB instance.
 				
 			
 				
-				<h3 id="EZMQSubscriber.Stop">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=9229:9284#L300">Stop</a>
+				<h3 id="EZMQSubscriber.Stop">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=11496:11551#L388">Stop</a>
 					<a class="permalink" href="#EZMQSubscriber.Stop">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) Stop() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -835,7 +1005,7 @@ Stops SUB instance.
 				
 			
 				
-				<h3 id="EZMQSubscriber.Subscribe">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=6199:6259#L211">Subscribe</a>
+				<h3 id="EZMQSubscriber.Subscribe">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=7086:7146#L258">Subscribe</a>
 					<a class="permalink" href="#EZMQSubscriber.Subscribe">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) Subscribe() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -848,7 +1018,7 @@ Subscribe for event/messages.
 				
 			
 				
-				<h3 id="EZMQSubscriber.SubscribeForTopic">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=6367:6447#L216">SubscribeForTopic</a>
+				<h3 id="EZMQSubscriber.SubscribeForTopic">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=7249:7329#L263">SubscribeForTopic</a>
 					<a class="permalink" href="#EZMQSubscriber.SubscribeForTopic">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) SubscribeForTopic(topic <a href="/pkg/builtin/#string">string</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -861,7 +1031,7 @@ Subscribe for event/messages on a particular topic.
 				
 			
 				
-				<h3 id="EZMQSubscriber.SubscribeForTopicList">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=7058:7149#L233">SubscribeForTopicList</a>
+				<h3 id="EZMQSubscriber.SubscribeForTopicList">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=7923:8014#L280">SubscribeForTopicList</a>
 					<a class="permalink" href="#EZMQSubscriber.SubscribeForTopicList">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) SubscribeForTopicList(topicList <a href="/pkg/container/list/">List</a>.<a href="/pkg/container/list/#List">List</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -881,7 +1051,28 @@ Note:
 				
 			
 				
-				<h3 id="EZMQSubscriber.UnSubscribe">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=7794:7856#L260">UnSubscribe</a>
+				<h3 id="EZMQSubscriber.SubscribeWithIPPort">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=8771:8874#L301">SubscribeWithIPPort</a>
+					<a class="permalink" href="#EZMQSubscriber.SubscribeWithIPPort">&#xb6;</a>
+				</h3>
+				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) SubscribeWithIPPort(ip <a href="/pkg/builtin/#string">string</a>, port <a href="/pkg/builtin/#int">int</a>, topic <a href="/pkg/builtin/#string">string</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
+				<p>
+Subscribe for event/messages from given IP:Port on the given topic.
+</p>
+<p>
+Note:
+(1) It will be using same Subscriber socket for connecting to given ip:port.
+(2) To un-subcribe use un-subscribe API with the same topic.
+(3) Topic name should be as path format. For example:home/livingroom/
+(4) Topic name can have letters [a-z, A-z], numeric [0-9] and special characters _ - / and .
+(5) Topic will be appended with forward slash [/] in case, if application has not appended it.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="EZMQSubscriber.UnSubscribe">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=10101:10163#L348">UnSubscribe</a>
 					<a class="permalink" href="#EZMQSubscriber.UnSubscribe">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) UnSubscribe() <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -894,7 +1085,7 @@ Un-subscribe all the events from publisher.
 				
 			
 				
-				<h3 id="EZMQSubscriber.UnSubscribeForTopic">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=8136:8218#L269">UnSubscribeForTopic</a>
+				<h3 id="EZMQSubscriber.UnSubscribeForTopic">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=10434:10516#L357">UnSubscribeForTopic</a>
 					<a class="permalink" href="#EZMQSubscriber.UnSubscribeForTopic">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) UnSubscribeForTopic(topic <a href="/pkg/builtin/#string">string</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -912,7 +1103,7 @@ Note:
 				
 			
 				
-				<h3 id="EZMQSubscriber.UnSubscribeForTopicList">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=8834:8927#L286">UnSubscribeForTopicList</a>
+				<h3 id="EZMQSubscriber.UnSubscribeForTopicList">func (*EZMQSubscriber) <a href="/src/target/ezmqsubscriber.go?s=11115:11208#L374">UnSubscribeForTopicList</a>
 					<a class="permalink" href="#EZMQSubscriber.UnSubscribeForTopicList">&#xb6;</a>
 				</h3>
 				<pre>func (subInstance *<a href="#EZMQSubscriber">EZMQSubscriber</a>) UnSubscribeForTopicList(topicList <a href="/pkg/container/list/">List</a>.<a href="/pkg/container/list/#List">List</a>) <a href="#EZMQErrorCode">EZMQErrorCode</a></pre>
@@ -934,7 +1125,7 @@ Note:
 		
 			
 			
-			<h2 id="Event">type <a href="/src/target/event.pb.go?s=1441:2145#L28">Event</a>
+			<h2 id="Event">type <a href="/src/target/event.pb.go?s=1404:2099#L28">Event</a>
 				<a class="permalink" href="#Event">&#xb6;</a>
 			</h2>
 			
@@ -961,7 +1152,7 @@ Note:
 
 			
 				
-				<h3 id="Event.Descriptor">func (*Event) <a href="/src/target/event.pb.go?s=2339:2381#L42">Descriptor</a>
+				<h3 id="Event.Descriptor">func (*Event) <a href="/src/target/event.pb.go?s=2288:2330#L42">Descriptor</a>
 					<a class="permalink" href="#Event.Descriptor">&#xb6;</a>
 				</h3>
 				<pre>func (*<a href="#Event">Event</a>) Descriptor() ([]<a href="/pkg/builtin/#byte">byte</a>, []<a href="/pkg/builtin/#int">int</a>)</pre>
@@ -971,7 +1162,20 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetCreated">func (*Event) <a href="/src/target/event.pb.go?s=2524:2558#L51">GetCreated</a>
+				<h3 id="Event.GetContentType">func (Event) <a href="/src/target/event.pb.go?s=2423:2470#L45">GetContentType</a>
+					<a class="permalink" href="#Event.GetContentType">&#xb6;</a>
+				</h3>
+				<pre>func (m <a href="#Event">Event</a>) GetContentType() <a href="#EZMQContentType">EZMQContentType</a></pre>
+				<p>
+This method is added specifically for ezmq message.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Event.GetCreated">func (*Event) <a href="/src/target/event.pb.go?s=2606:2640#L56">GetCreated</a>
 					<a class="permalink" href="#Event.GetCreated">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetCreated() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -981,7 +1185,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetDevice">func (*Event) <a href="/src/target/event.pb.go?s=2981:3015#L79">GetDevice</a>
+				<h3 id="Event.GetDevice">func (*Event) <a href="/src/target/event.pb.go?s=3035:3069#L84">GetDevice</a>
 					<a class="permalink" href="#Event.GetDevice">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetDevice() <a href="/pkg/builtin/#string">string</a></pre>
@@ -991,7 +1195,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetId">func (*Event) <a href="/src/target/event.pb.go?s=2422:2452#L44">GetId</a>
+				<h3 id="Event.GetId">func (*Event) <a href="/src/target/event.pb.go?s=2511:2541#L49">GetId</a>
 					<a class="permalink" href="#Event.GetId">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetId() <a href="/pkg/builtin/#string">string</a></pre>
@@ -1001,7 +1205,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetModified">func (*Event) <a href="/src/target/event.pb.go?s=2639:2674#L58">GetModified</a>
+				<h3 id="Event.GetModified">func (*Event) <a href="/src/target/event.pb.go?s=2714:2749#L63">GetModified</a>
 					<a class="permalink" href="#Event.GetModified">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetModified() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1011,7 +1215,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetOrigin">func (*Event) <a href="/src/target/event.pb.go?s=2757:2790#L65">GetOrigin</a>
+				<h3 id="Event.GetOrigin">func (*Event) <a href="/src/target/event.pb.go?s=2825:2858#L70">GetOrigin</a>
 					<a class="permalink" href="#Event.GetOrigin">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetOrigin() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1021,7 +1225,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetPushed">func (*Event) <a href="/src/target/event.pb.go?s=2869:2902#L72">GetPushed</a>
+				<h3 id="Event.GetPushed">func (*Event) <a href="/src/target/event.pb.go?s=2930:2963#L77">GetPushed</a>
 					<a class="permalink" href="#Event.GetPushed">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetPushed() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1031,7 +1235,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.GetReading">func (*Event) <a href="/src/target/event.pb.go?s=3095:3134#L86">GetReading</a>
+				<h3 id="Event.GetReading">func (*Event) <a href="/src/target/event.pb.go?s=3142:3181#L91">GetReading</a>
 					<a class="permalink" href="#Event.GetReading">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) GetReading() []*<a href="#Reading">Reading</a></pre>
@@ -1041,7 +1245,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.ProtoMessage">func (*Event) <a href="/src/target/event.pb.go?s=2292:2320#L41">ProtoMessage</a>
+				<h3 id="Event.ProtoMessage">func (*Event) <a href="/src/target/event.pb.go?s=2242:2270#L41">ProtoMessage</a>
 					<a class="permalink" href="#Event.ProtoMessage">&#xb6;</a>
 				</h3>
 				<pre>func (*<a href="#Event">Event</a>) ProtoMessage()</pre>
@@ -1051,7 +1255,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.Reset">func (*Event) <a href="/src/target/event.pb.go?s=2149:2172#L39">Reset</a>
+				<h3 id="Event.Reset">func (*Event) <a href="/src/target/event.pb.go?s=2101:2124#L39">Reset</a>
 					<a class="permalink" href="#Event.Reset">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) Reset()</pre>
@@ -1061,7 +1265,7 @@ Note:
 				
 			
 				
-				<h3 id="Event.String">func (*Event) <a href="/src/target/event.pb.go?s=2210:2241#L40">String</a>
+				<h3 id="Event.String">func (*Event) <a href="/src/target/event.pb.go?s=2161:2192#L40">String</a>
 					<a class="permalink" href="#Event.String">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Event">Event</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
@@ -1073,7 +1277,7 @@ Note:
 		
 			
 			
-			<h2 id="Reading">type <a href="/src/target/event.pb.go?s=3196:3958#L93">Reading</a>
+			<h2 id="Reading">type <a href="/src/target/event.pb.go?s=3236:3988#L98">Reading</a>
 				<a class="permalink" href="#Reading">&#xb6;</a>
 			</h2>
 			
@@ -1101,7 +1305,7 @@ Note:
 
 			
 				
-				<h3 id="Reading.Descriptor">func (*Reading) <a href="/src/target/event.pb.go?s=4160:4204#L108">Descriptor</a>
+				<h3 id="Reading.Descriptor">func (*Reading) <a href="/src/target/event.pb.go?s=4185:4229#L113">Descriptor</a>
 					<a class="permalink" href="#Reading.Descriptor">&#xb6;</a>
 				</h3>
 				<pre>func (*<a href="#Reading">Reading</a>) Descriptor() ([]<a href="/pkg/builtin/#byte">byte</a>, []<a href="/pkg/builtin/#int">int</a>)</pre>
@@ -1111,7 +1315,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetCreated">func (*Reading) <a href="/src/target/event.pb.go?s=4349:4385#L117">GetCreated</a>
+				<h3 id="Reading.GetCreated">func (*Reading) <a href="/src/target/event.pb.go?s=4365:4401#L122">GetCreated</a>
 					<a class="permalink" href="#Reading.GetCreated">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetCreated() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1121,7 +1325,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetDevice">func (*Reading) <a href="/src/target/event.pb.go?s=5037:5073#L159">GetDevice</a>
+				<h3 id="Reading.GetDevice">func (*Reading) <a href="/src/target/event.pb.go?s=5011:5047#L164">GetDevice</a>
 					<a class="permalink" href="#Reading.GetDevice">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetDevice() <a href="/pkg/builtin/#string">string</a></pre>
@@ -1131,7 +1335,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetId">func (*Reading) <a href="/src/target/event.pb.go?s=4245:4277#L110">GetId</a>
+				<h3 id="Reading.GetId">func (*Reading) <a href="/src/target/event.pb.go?s=4268:4300#L115">GetId</a>
 					<a class="permalink" href="#Reading.GetId">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetId() <a href="/pkg/builtin/#string">string</a></pre>
@@ -1141,7 +1345,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetModified">func (*Reading) <a href="/src/target/event.pb.go?s=4466:4503#L124">GetModified</a>
+				<h3 id="Reading.GetModified">func (*Reading) <a href="/src/target/event.pb.go?s=4475:4512#L129">GetModified</a>
 					<a class="permalink" href="#Reading.GetModified">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetModified() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1151,7 +1355,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetName">func (*Reading) <a href="/src/target/event.pb.go?s=4814:4848#L145">GetName</a>
+				<h3 id="Reading.GetName">func (*Reading) <a href="/src/target/event.pb.go?s=4802:4836#L150">GetName</a>
 					<a class="permalink" href="#Reading.GetName">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetName() <a href="/pkg/builtin/#string">string</a></pre>
@@ -1161,7 +1365,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetOrigin">func (*Reading) <a href="/src/target/event.pb.go?s=4586:4621#L131">GetOrigin</a>
+				<h3 id="Reading.GetOrigin">func (*Reading) <a href="/src/target/event.pb.go?s=4588:4623#L136">GetOrigin</a>
 					<a class="permalink" href="#Reading.GetOrigin">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetOrigin() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1171,7 +1375,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetPushed">func (*Reading) <a href="/src/target/event.pb.go?s=4700:4735#L138">GetPushed</a>
+				<h3 id="Reading.GetPushed">func (*Reading) <a href="/src/target/event.pb.go?s=4695:4730#L143">GetPushed</a>
 					<a class="permalink" href="#Reading.GetPushed">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetPushed() <a href="/pkg/builtin/#int64">int64</a></pre>
@@ -1181,7 +1385,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.GetValue">func (*Reading) <a href="/src/target/event.pb.go?s=4924:4959#L152">GetValue</a>
+				<h3 id="Reading.GetValue">func (*Reading) <a href="/src/target/event.pb.go?s=4905:4940#L157">GetValue</a>
 					<a class="permalink" href="#Reading.GetValue">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) GetValue() <a href="/pkg/builtin/#string">string</a></pre>
@@ -1191,7 +1395,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.ProtoMessage">func (*Reading) <a href="/src/target/event.pb.go?s=4111:4141#L107">ProtoMessage</a>
+				<h3 id="Reading.ProtoMessage">func (*Reading) <a href="/src/target/event.pb.go?s=4137:4167#L112">ProtoMessage</a>
 					<a class="permalink" href="#Reading.ProtoMessage">&#xb6;</a>
 				</h3>
 				<pre>func (*<a href="#Reading">Reading</a>) ProtoMessage()</pre>
@@ -1201,7 +1405,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.Reset">func (*Reading) <a href="/src/target/event.pb.go?s=3962:3987#L105">Reset</a>
+				<h3 id="Reading.Reset">func (*Reading) <a href="/src/target/event.pb.go?s=3990:4015#L110">Reset</a>
 					<a class="permalink" href="#Reading.Reset">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) Reset()</pre>
@@ -1211,7 +1415,7 @@ Note:
 				
 			
 				
-				<h3 id="Reading.String">func (*Reading) <a href="/src/target/event.pb.go?s=4027:4060#L106">String</a>
+				<h3 id="Reading.String">func (*Reading) <a href="/src/target/event.pb.go?s=4054:4087#L111">String</a>
 					<a class="permalink" href="#Reading.String">&#xb6;</a>
 				</h3>
 				<pre>func (m *<a href="#Reading">Reading</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
