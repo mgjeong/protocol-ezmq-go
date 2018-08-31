@@ -1,4 +1,4 @@
-// +build unsecure
+// +build !unsecure
 
 package ezmq
 
@@ -22,6 +22,9 @@ const PUB_TCP_PREFIX = "tcp://*:"
 // Regex Pattern for Topic validation.
 const TOPIC_PATTERN = "^[a-zA-Z0-9-_./]+$"
 
+// Publisher key length
+const PUB_KEY_LENGTH = 40
+
 // Callback to get error code for start of EZMQ publisher.
 // [As of now, Not being used]
 type EZMQStartCB func(code EZMQErrorCode)
@@ -36,10 +39,11 @@ type EZMQErrorCB func(code EZMQErrorCode)
 
 //Structure represents EZMQPublisher.
 type EZMQPublisher struct {
-	port          int
-	startCallback EZMQStartCB
-	stopCallback  EZMQStopCB
-	errorCallback EZMQErrorCB
+	port            int
+	startCallback   EZMQStartCB
+	stopCallback    EZMQStopCB
+	errorCallback   EZMQErrorCB
+	serverSecretKey []byte
 
 	publisher *zmq.Socket
 	context   *zmq.Context
@@ -66,6 +70,21 @@ func GetEZMQPublisher(port int, startCallback EZMQStartCB, stopCallback EZMQStop
 	return instance
 }
 
+// Set the server private/secret key.
+//
+// Note:
+// (1) Key should be 40-character string encoded in the Z85 encoding format
+//
+// (2) This API should be called before start() API.
+func (pubInstance *EZMQPublisher) SetServerPrivateKey(key []byte) EZMQErrorCode {
+	if len(key) != PUB_KEY_LENGTH {
+		logger.Error("Invalid key length")
+		return EZMQ_ERROR
+	}
+	pubInstance.serverSecretKey = key
+	return EZMQ_OK
+}
+
 // Starts PUB instance.
 func (pubInstance *EZMQPublisher) Start() EZMQErrorCode {
 	if nil == pubInstance.context {
@@ -80,7 +99,20 @@ func (pubInstance *EZMQPublisher) Start() EZMQErrorCode {
 		pubInstance.publisher, err = instance.context.NewSocket(zmq.PUB)
 		if nil != err {
 			logger.Error("Publisher Socket creation failed")
+			return EZMQ_ERROR
 		}
+		if len(pubInstance.serverSecretKey) == PUB_KEY_LENGTH {
+			error := pubInstance.publisher.ServerAuthCurve("", string(pubInstance.serverSecretKey[:]))
+			if nil != error {
+				logger.Error("Set server secret key failed")
+				//clear the keys
+				//pubInstance.clearPubKeys();
+				return EZMQ_ERROR
+			}
+		}
+		//clear the keys
+		//pubInstance.clearPubKeys();
+
 		var address string = getPubSocketAddress(pubInstance.port)
 		err = pubInstance.publisher.Bind(address)
 		if nil != err {
@@ -88,7 +120,7 @@ func (pubInstance *EZMQPublisher) Start() EZMQErrorCode {
 			pubInstance.publisher = nil
 			return EZMQ_ERROR
 		}
-		logger.Debug("Publisher started", zap.String("address", address))
+		logger.Debug("Publisher started [Secured]", zap.String("address", address))
 	}
 	return EZMQ_OK
 }
