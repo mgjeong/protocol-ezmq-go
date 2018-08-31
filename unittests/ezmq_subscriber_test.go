@@ -18,20 +18,30 @@
 package unittests
 
 import (
-	ezmq "go/ezmq"
-	utils "go/unittests/utils"
+	"go/ezmq"
+	"go/unittests/utils"
 
 	List "container/list"
 	"fmt"
 	"testing"
+	"time"
 )
 
 var subResult ezmq.EZMQErrorCode
 var subApiInstance *ezmq.EZMQAPI
 var subscriber *ezmq.EZMQSubscriber
 
-func subCB(ezmqMsg ezmq.EZMQMessage)                    { fmt.Printf("\nsubCB") }
-func subTopicCB(topic string, ezmqMsg ezmq.EZMQMessage) { fmt.Printf("\nsubTopicCB") }
+var published = make(chan bool, 1)
+var eventCount = 0
+
+func subCB(ezmqMsg ezmq.EZMQMessage) {
+	fmt.Printf("\nsubCB")
+	eventCount++
+}
+func subTopicCB(topic string, ezmqMsg ezmq.EZMQMessage) {
+	fmt.Printf("\nsubTopicCB")
+	eventCount++
+}
 
 func TestGetSubInstance(t *testing.T) {
 	subApiInstance = ezmq.GetInstance()
@@ -110,6 +120,21 @@ func TestSubscribe2(t *testing.T) {
 	}
 }
 
+func publish() {
+	var pubApiInstance *ezmq.EZMQAPI
+	pubApiInstance = ezmq.GetInstance()
+	pubApiInstance.Initialize()
+	publisher = ezmq.GetEZMQPublisher(utils.Port, startCB, stopCB, errorCB)
+	publisher.Start()
+	var event ezmq.Event = utils.GetEvent()
+	for i := 0; i < 5; i++ {
+		time.Sleep(500 * time.Millisecond)
+		publisher.PublishOnTopic(utils.Topic, event)
+	}
+	publisher.Stop()
+	published <- true
+}
+
 func TestSubscribe3(t *testing.T) {
 	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
 	if nil == subscriber {
@@ -120,7 +145,35 @@ func TestSubscribe3(t *testing.T) {
 		t.Errorf("\nError while starting subscriber\n")
 	}
 
+	subResult = subscriber.SubscribeForTopic(utils.Topic)
+	if subResult != 0 {
+		t.Errorf("\nError while subscribing on Utils.Topic\n")
+	}
+
+	go publish()
+	<-published // wait for publisher to stop
+
+	subResult = subscriber.Stop()
+	if subResult != 0 {
+		t.Errorf("\nError while Stopping subscriber")
+	}
+}
+
+func TestSubscribe4(t *testing.T) {
+	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
+	if nil == subscriber {
+		t.Errorf("\nSubscriber instance is NULL")
+	}
+	subResult = subscriber.Start()
+	if subResult != 0 {
+		t.Errorf("\nError while starting subscriber\n")
+	}
+
 	topicList := List.New()
+	subResult = subscriber.SubscribeForTopicList(*topicList)
+	if subResult != 2 {
+		t.Errorf("\nWrong error code\n")
+	}
 	e1 := topicList.PushFront("topic1")
 	_ = e1
 	e2 := topicList.PushFront("topic2")
@@ -250,6 +303,50 @@ func TestSubscribeTopic(t *testing.T) {
 	}
 }
 
+func TestSubscribeSecured(t *testing.T) {
+	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
+	if nil == subscriber {
+		t.Errorf("\nSubscriber instance is NULL")
+	}
+
+	clientPrivateKey := "ZB1@RS6Kv^zucova$kH(!o>tZCQ.<!Q)6-0aWFmW"
+	clientPublicKey := "-QW?Ved(f:<::3d5tJ$[4Er&]6#9yr=vha/caBc("
+	subResult = subscriber.SetClientKeys([]byte(clientPrivateKey), []byte(clientPublicKey))
+	if subResult != ezmq.EZMQ_OK {
+		t.Errorf("\nError while setting client keys\n")
+	}
+	serverPublicKey := "tXJx&1^QE2g7WCXbF.$$TVP.wCtxwNhR8?iLi&S<"
+	subResult = subscriber.SetServerPublicKey([]byte(serverPublicKey))
+	if subResult != ezmq.EZMQ_OK {
+		t.Errorf("\nError while setting server key\n")
+	}
+
+	//Negative case
+	subResult = subscriber.SetClientKeys([]byte(""), []byte(""))
+	if subResult != ezmq.EZMQ_ERROR {
+		t.Errorf("\nError while setting client keys\n")
+	}
+	subResult = subscriber.SetServerPublicKey([]byte(""))
+	if subResult != ezmq.EZMQ_ERROR {
+		t.Errorf("\nError while setting server key\n")
+	}
+
+	subResult = subscriber.Start()
+	if subResult != 0 {
+		t.Errorf("\nError while starting subscriber\n")
+	}
+
+	subResult = subscriber.Subscribe()
+	if subResult != 0 {
+		t.Errorf("\nError while subscribing\n")
+	}
+
+	subResult = subscriber.Stop()
+	if subResult != 0 {
+		t.Errorf("\nError while Stopping subscriber")
+	}
+}
+
 func TestSubscribeNegative(t *testing.T) {
 	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, -1, subCB, subTopicCB)
 	if nil == subscriber {
@@ -360,7 +457,7 @@ func TestUnSubscribeNegative(t *testing.T) {
 	}
 }
 
-func TestSubscriberIPPort(t *testing.T)  {
+func TestSubscriberIPPort(t *testing.T) {
 	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
 	if nil == subscriber {
 		t.Errorf("\nSubscriber instance is NULL")
@@ -380,6 +477,40 @@ func TestSubscriberIPPort(t *testing.T)  {
 	subResult = subscriber.SubscribeWithIPPort("192.168.1.1", 5562, "")
 	if subResult != 2 {
 		t.Errorf("\nReturned wrong value\n")
+	}
+}
+
+func TestSubscribeIPPortSecured(t *testing.T) {
+	subscriber = ezmq.GetEZMQSubscriber(utils.Ip, utils.Port, subCB, subTopicCB)
+	if nil == subscriber {
+		t.Errorf("\nSubscriber instance is NULL")
+	}
+
+	clientPrivateKey := "ZB1@RS6Kv^zucova$kH(!o>tZCQ.<!Q)6-0aWFmW"
+	clientPublicKey := "-QW?Ved(f:<::3d5tJ$[4Er&]6#9yr=vha/caBc("
+	subResult = subscriber.SetClientKeys([]byte(clientPrivateKey), []byte(clientPublicKey))
+	if subResult != ezmq.EZMQ_OK {
+		t.Errorf("\nError while setting client keys\n")
+	}
+	serverPublicKey := "tXJx&1^QE2g7WCXbF.$$TVP.wCtxwNhR8?iLi&S<"
+	subResult = subscriber.SetServerPublicKey([]byte(serverPublicKey))
+	if subResult != ezmq.EZMQ_OK {
+		t.Errorf("\nError while setting server key\n")
+	}
+
+	subResult = subscriber.Start()
+	if subResult != 0 {
+		t.Errorf("\nError while starting subscriber\n")
+	}
+
+	subResult = subscriber.SubscribeWithIPPort("192.168.1.1", 5562, utils.Topic)
+	if subResult != 0 {
+		t.Errorf("\nError while subscribing\n")
+	}
+
+	subResult = subscriber.Stop()
+	if subResult != 0 {
+		t.Errorf("\nError while Stopping subscriber")
 	}
 }
 

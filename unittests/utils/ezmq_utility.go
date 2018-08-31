@@ -97,4 +97,3 @@ func GetByteDataEvent() ezmq.EZMQByteData {
 	bytes.ByteData = byteArray[:]
 	return bytes
 }
-
