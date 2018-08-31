@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2017 Samsung Electronics All Rights Reserved.
+ * Copyright 2018 Samsung Electronics All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ import (
 	"syscall"
 )
 
+const serverPublicKey = "tXJx&1^QE2g7WCXbF.$$TVP.wCtxwNhR8?iLi&S<"
+const clientPrivateKey = "ZB1@RS6Kv^zucova$kH(!o>tZCQ.<!Q)6-0aWFmW"
+const clientPublicKey = "-QW?Ved(f:<::3d5tJ$[4Er&]6#9yr=vha/caBc("
+
 func printEvent(event ezmq.Event) {
 	fmt.Printf("\n--------------------------------------")
 	fmt.Printf("\nDevice: %s", event.GetDevice())
@@ -52,17 +56,20 @@ func printByteData(byteData []byte) {
 func printError() {
 	fmt.Printf("\nRe-run the application as shown in below examples: \n")
 	fmt.Printf("\n  (1) For subscribing without topic: ")
-	fmt.Printf("\n     ./subscriber -ip 192.168.1.1 -port 5562")
-	fmt.Printf("\n     ./subscriber -ip localhost -port 5562\n")
-	fmt.Printf("\n  (2) For subscribing with topic: ")
-	fmt.Printf("\n     ./subscriber -ip 192.168.1.1 -port 5562 -t topic1")
-	fmt.Printf("\n     ./subscriber -ip localhost -port 5562 -t topic1\n")
+	fmt.Printf("\n     ./subscriber_secured -ip 192.168.1.1 -port 5562\n")
+	fmt.Printf("\n  (2) For subscribing without topic: [Secured] ")
+	fmt.Printf("\n     ./subscriber_secured -ip 192.168.1.1 -port 5562 -secured 1\n")
+	fmt.Printf("\n  (3) For subscribing with topic: ")
+	fmt.Printf("\n     ./subscriber_secured -ip 192.168.1.1 -port 5562 -t topic1\n")
+	fmt.Printf("\n  (4) For subscribing with topic: [Secured] ")
+	fmt.Printf("\n     ./subscriber_secured -ip 192.168.1.1 -port 5562 -t topic1 -secured 1\n")
 	os.Exit(-1)
 }
 
 func main() {
 	var ip string
 	var port int
+	var isSecured = 0
 	var topic string
 	var result ezmq.EZMQErrorCode
 	var instance *ezmq.EZMQAPI
@@ -70,7 +77,7 @@ func main() {
 	var isSubscribed bool = false
 
 	// get ip and port from command line arguments
-	if len(os.Args) != 5 && len(os.Args) != 7 {
+	if len(os.Args) != 5 && len(os.Args) != 7 && len(os.Args) != 9 {
 		printError()
 	}
 
@@ -86,6 +93,10 @@ func main() {
 		} else if 0 == strings.Compare(os.Args[n], "-t") {
 			topic = os.Args[n+1]
 			fmt.Printf("Topic is : %s", topic)
+			n = n + 1
+		} else if 0 == strings.Compare(os.Args[n], "-secured") {
+			isSecured, _ = strconv.Atoi(os.Args[n+1])
+			fmt.Printf("\nSecured %d: ", isSecured)
 			n = n + 1
 		} else {
 			printError()
@@ -146,6 +157,19 @@ func main() {
 	}
 
 	subscriber = ezmq.GetEZMQSubscriber(ip, port, subCB, subTopicCB)
+	// set keys
+	if 1 == isSecured {
+		result = subscriber.SetClientKeys([]byte(clientPrivateKey), []byte(clientPublicKey))
+		if result != ezmq.EZMQ_OK {
+			fmt.Printf("\nError while setting client keys\n")
+			os.Exit(-1)
+		}
+		result = subscriber.SetServerPublicKey([]byte(serverPublicKey))
+		if result != ezmq.EZMQ_OK {
+			fmt.Printf("\nError while setting server key\n")
+			os.Exit(-1)
+		}
+	}
 
 	// start subscriber
 	result = subscriber.Start()
