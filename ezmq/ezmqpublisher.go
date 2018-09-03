@@ -123,7 +123,7 @@ func (pubInstance *EZMQPublisher) publishInternal(topic string, ezmqMsg EZMQMess
 		event := ezmqMsg.(Event)
 		byteEvent, err = proto.Marshal(&event)
 		if nil != err {
-			logger.Error("Error occured while marshalling event")
+			logger.Error("Error occured while marshalling proto event")
 			return EZMQ_ERROR
 		}
 	} else if contentType == EZMQ_CONTENT_TYPE_BYTEDATA {
