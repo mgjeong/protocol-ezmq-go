@@ -130,7 +130,7 @@ func (pubInstance *EZMQPublisher) publishInternal(topic string, ezmqMsg EZMQMess
 		ezmqByteData := ezmqMsg.(EZMQByteData)
 		byteEvent = ezmqByteData.GetByteData()
 	} else {
-		logger.Error("Not a supported type")
+		logger.Error("Not a supported messsage type")
 		return EZMQ_INVALID_CONTENT_TYPE
 	}
 
