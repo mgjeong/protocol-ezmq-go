@@ -1,4 +1,4 @@
-// +build unsecure
+// +build !unsecure
 
 package ezmq
 
@@ -19,6 +19,9 @@ import (
 const SUB_TCP_PREFIX = "tcp://"
 const INPROC_PREFIX = "inproc://shutdown-"
 
+// Subscriber key length
+const SUB_KEY_LENGTH = 40
+
 // Callback to get all the subscribed events.
 type EZMQSubCB func(event EZMQMessage)
 
@@ -32,13 +35,15 @@ type EZMQSubscriber struct {
 	subCallback      EZMQSubCB
 	subTopicCallback EZMQSubTopicCB
 	mutex            *sync.Mutex
-
-	context        *zmq.Context
-	subscriber     *zmq.Socket
-	shutdownServer *zmq.Socket
-	shutdownClient *zmq.Socket
-	poller         *zmq.Poller
-	shutdownChan   chan string
+	serverPublicKey  []byte
+	clientPublicKey  []byte
+	clientSecretKey  []byte
+	context          *zmq.Context
+	subscriber       *zmq.Socket
+	shutdownServer   *zmq.Socket
+	shutdownClient   *zmq.Socket
+	poller           *zmq.Poller
+	shutdownChan     chan string
 
 	isReceiverStarted bool
 }
@@ -163,6 +168,42 @@ End:
 	}
 }
 
+// Set the security keys of client/its own.
+//
+// Note:
+// (1) Key should be 40-character string encoded in the Z85 encoding format <br>
+//
+// (2) This API should be called before start() API.
+func (subInstance *EZMQSubscriber) SetClientKeys(clientPrivateKey []byte, clientPublicKey []byte) EZMQErrorCode {
+	if len(clientPrivateKey) != SUB_KEY_LENGTH || len(clientPublicKey) != SUB_KEY_LENGTH {
+		logger.Error("Invalid key length")
+		return EZMQ_ERROR
+	}
+	subInstance.clientSecretKey = clientPrivateKey
+	subInstance.clientPublicKey = clientPublicKey
+	return EZMQ_OK
+}
+
+// Set the server public key.
+//
+// Note:
+// (1) Key should be 40-character string encoded in the Z85 encoding format <br>
+//
+// (2) This API should be called before start() API.
+//
+// (3) If using the following API in secured mode:
+//
+//     SubscribeWithIPPort(ip string, port int, topic string) EZMQErrorCode
+//     SetServerPublicKey API needs to be called before that.
+func (subInstance *EZMQSubscriber) SetServerPublicKey(key []byte) EZMQErrorCode {
+	if len(key) != SUB_KEY_LENGTH {
+		logger.Error("Invalid key length")
+		return EZMQ_ERROR
+	}
+	subInstance.serverPublicKey = key
+	return EZMQ_OK
+}
+
 // Starts SUB instance.
 func (subInstance *EZMQSubscriber) Start() EZMQErrorCode {
 	if nil == subInstance.context {
@@ -207,6 +248,15 @@ func (subInstance *EZMQSubscriber) Start() EZMQErrorCode {
 		if nil != err {
 			logger.Error("Subscriber Socket creation failed")
 			return EZMQ_ERROR
+		}
+		//set keys
+		if len(subInstance.serverPublicKey) == SUB_KEY_LENGTH && len(subInstance.clientPublicKey) == SUB_KEY_LENGTH && len(subInstance.clientSecretKey) == SUB_KEY_LENGTH {
+			error := subInstance.subscriber.ClientAuthCurve(string(subInstance.serverPublicKey[:]), string(subInstance.clientPublicKey[:]),
+				string(subInstance.clientSecretKey[:]))
+			if nil != error {
+				logger.Error("Subscriber set keys failed")
+				return EZMQ_ERROR
+			}
 		}
 		address = getSubSocketAddress(subInstance.ip, subInstance.port)
 		err = subInstance.subscriber.Connect(address)
@@ -298,6 +348,8 @@ func (subInstance *EZMQSubscriber) SubscribeForTopicList(topicList List.List) EZ
 // (4) Topic name can have letters [a-z, A-z], numeric [0-9] and special characters _ - / and .
 //
 // (5) Topic will be appended with forward slash [/] in case, if application has not appended it.
+//
+// (6) If using in secured mode: Call setServerPublicKey API with target server public key before calling this API.
 func (subInstance *EZMQSubscriber) SubscribeWithIPPort(ip string, port int, topic string) EZMQErrorCode {
 	if port < 0 {
 		return EZMQ_ERROR
@@ -312,6 +364,15 @@ func (subInstance *EZMQSubscriber) SubscribeWithIPPort(ip string, port int, topi
 	if nil == subInstance.subscriber {
 		logger.Error("subscriber is null")
 		return EZMQ_ERROR
+	}
+	//set keys
+	if len(subInstance.serverPublicKey) == SUB_KEY_LENGTH && len(subInstance.clientPublicKey) == SUB_KEY_LENGTH && len(subInstance.clientSecretKey) == SUB_KEY_LENGTH {
+		error := subInstance.subscriber.ClientAuthCurve(string(subInstance.serverPublicKey[:]), string(subInstance.clientPublicKey[:]),
+			string(subInstance.clientSecretKey[:]))
+		if nil != error {
+			logger.Error("Subscriber set keys failed")
+			return EZMQ_ERROR
+		}
 	}
 	address := getSubSocketAddress(ip, port)
 	err := subInstance.subscriber.Connect(address)

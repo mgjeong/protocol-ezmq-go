@@ -106,7 +106,6 @@ func TestSerialization(t *testing.T) {
 	if (readings[0].String()) != covertedReadings[0].String() {
 		t.Errorf("Reading: String mismatch")
 	}
-
 	//reset the reading
 	covertedReadings[0].Reset()
 }
@@ -115,5 +114,33 @@ func TestEventContentType(t *testing.T) {
 	event := utils.GetEvent()
 	if 0 != event.GetContentType() {
 		t.Errorf("\nAssertion failed")
+	}
+}
+
+func TestEmptyEvent(t *testing.T) {
+	var event ezmq.Event
+	var reading1 *ezmq.Reading = &ezmq.Reading{}
+	event.Reading = make([]*ezmq.Reading, 1)
+	event.Reading[0] = reading1
+	stringValue := event.GetDevice()
+	stringValue = event.GetId()
+	intValue := event.GetCreated()
+	intValue = event.GetModified()
+	intValue = event.GetOrigin()
+	intValue = event.GetPushed()
+	var readings []*ezmq.Reading = event.GetReading()
+	stringValue = readings[0].GetDevice()
+	stringValue = readings[0].GetId()
+	stringValue = readings[0].GetValue()
+	stringValue = readings[0].GetName()
+	intValue = readings[0].GetOrigin()
+	intValue = readings[0].GetPushed()
+	intValue = readings[0].GetModified()
+	intValue = readings[0].GetCreated()
+	if stringValue != "" {
+		t.Errorf("\nInvalid value")
+	}
+	if intValue != 0 {
+		t.Errorf("\nInvalid value")
 	}
 }

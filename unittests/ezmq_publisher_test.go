@@ -18,8 +18,8 @@
 package unittests
 
 import (
-	ezmq "go/ezmq"
-	utils "go/unittests/utils"
+	"go/ezmq"
+	"go/unittests/utils"
 
 	List "container/list"
 	"fmt"
@@ -145,6 +145,10 @@ func TestPublish3(t *testing.T) {
 
 	var event ezmq.Event = utils.GetEvent()
 	topicList := List.New()
+	pubResult = publisher.PublishOnTopicList(*topicList, event)
+	if pubResult != 2 {
+		t.Errorf("\nWrong error code\n")
+	}
 	e1 := topicList.PushFront("topic1")
 	_ = e1
 	e2 := topicList.PushFront("topic2")
@@ -173,6 +177,50 @@ func TestPublish3(t *testing.T) {
 	pubResult = publisher.Stop()
 	if pubResult != 0 {
 		t.Errorf("Error while Stopping publisher")
+	}
+	pubApiInstance.Terminate()
+}
+
+func TestPublishSecured(t *testing.T) {
+	pubApiInstance = ezmq.GetInstance()
+	pubApiInstance.Initialize()
+	publisher = ezmq.GetEZMQPublisher(utils.Port, startCB, stopCB, errorCB)
+	if nil == publisher {
+		t.Errorf("\nPublisher instance is NULL")
+	}
+
+	serverSecretKey := "[:X%Q3UfY+kv2A^.wv:(qy2E=bk0L][cm=mS3Hcx"
+	pubResult = publisher.SetServerPrivateKey([]byte(serverSecretKey))
+	if pubResult != ezmq.EZMQ_OK {
+		t.Errorf("\nError while setting server private key\n")
+	}
+
+	//negative case
+	pubResult = publisher.SetServerPrivateKey([]byte(""))
+	if pubResult != ezmq.EZMQ_ERROR {
+		t.Errorf("\nWrong error code\n")
+	}
+
+	pubResult = publisher.Start()
+	if pubResult != 0 {
+		t.Errorf("\nError while starting publisher\n")
+	}
+
+	var event ezmq.Event = utils.GetEvent()
+	pubResult = publisher.Publish(event)
+	if pubResult != 0 {
+		t.Errorf("\nError while publishing event\n")
+	}
+
+	byteData := utils.GetByteDataEvent()
+	pubResult = publisher.Publish(byteData)
+	if pubResult != 0 {
+		t.Errorf("\nError while publishing event\n")
+	}
+
+	pubResult = publisher.Stop()
+	if pubResult != 0 {
+		t.Errorf("\nError while Stopping publisher")
 	}
 	pubApiInstance.Terminate()
 }

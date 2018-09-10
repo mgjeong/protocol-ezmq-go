@@ -25,6 +25,10 @@ and serialization / deserialization middlewares along with some added functional
   - Version : 1.9
   - [How to install](https://golang.org/doc/install)
 
+- You must install **libsodium**: [It is required for secured mode]
+   ```
+   $ sudo apt-get install libsodium-dev 
+   ```
 
 ## How to build ##
 1. Goto: ~/protocol-ezmq-go/</br>
@@ -47,7 +51,28 @@ and serialization / deserialization middlewares along with some added functional
 ### Prerequisites ###
  Built ezmq library
 
-### Subscriber sample ###
+### Subscriber sample [Secured] ###
+1. Goto: ~/${GOPATH}/src/go/samples/
+2. Run the sample:
+    ```
+     ./subscriber_secured
+    ```
+    - **It will give list of options for running the sample.** </br>
+    - **Update ip, port and topic as per requirement.** </br>
+    - **With secured sample unsecured features can be tested** </br>
+
+### Publisher sample [Secured] ###
+
+1. Goto: ~/${GOPATH}/src/go/samples/
+2. Run the sample:
+   ```
+   ./publisher_secured
+   ```
+   - **It will give list of options for running the sample.** </br>
+   - **Update port and topic as per requirement.** </br>
+   - **With secured sample unsecured features can be tested** </br>
+
+### Subscriber sample  ###
 1. Goto: ~/${GOPATH}/src/go/samples/
 2. Run the sample:
     ```
@@ -55,7 +80,8 @@ and serialization / deserialization middlewares along with some added functional
     ```
     - **It will give list of options for running the sample.** </br>
     - **Update ip, port and topic as per requirement.** </br>
-
+    - **This sample will be built, only if ezmq package is built in unsecured mode.** </br>
+    
 ### Publisher sample ###
 
 1. Goto: ~/${GOPATH}/src/go/samples/
@@ -64,7 +90,8 @@ and serialization / deserialization middlewares along with some added functional
    ./publisher
    ```
    - **It will give list of options for running the sample.** </br>
-   - **Update port and topic as per requirement.** </br>
+   - **Update port and topic as per requirement.** </br>    
+   - **This sample will be built, only if ezmq package is built in unsecured mode.** </br>
 
 ## Unit test and code coverage report
 
