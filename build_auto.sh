@@ -300,7 +300,7 @@ usage() {
     echo -e "${BLUE}Usage:${NO_COLOUR} ./build_auto.sh <option>"
     echo -e "${GREEN}Options:${NO_COLOUR}"
     echo "  --target_arch=[x86|x86_64|arm|arm64|armhf|armhf-qemu|armhf-native] :  Choose Target Architecture"
-    echo "  --with_dependencies=[true|false](default: false)                               :  Build ezmq along with dependencies [zmq and protobuf]"
+    echo "  --with_dependencies=[true|false](default: false)                   :  Build ezmq along with dependencies [zmq and protobuf]"
     echo "  --build_mode=[release|debug](default: release)                     :  Build ezmq library and samples in release or debug mode"
     echo "  --with_security=[true|false](default: true)                        :  Build ezmq library with or without Security feature"
     echo "  -c                                                                 :  Clean ezmq Repository and its dependencies"
