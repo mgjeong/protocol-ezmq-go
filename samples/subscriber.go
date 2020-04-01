@@ -52,10 +52,10 @@ func printByteData(byteData []byte) {
 func printError() {
 	fmt.Printf("\nRe-run the application as shown in below examples: \n")
 	fmt.Printf("\n  (1) For subscribing without topic: ")
-	fmt.Printf("\n     ./subscriber -ip 107.108.81.116 -port 5562")
+	fmt.Printf("\n     ./subscriber -ip 0.0.0.0 -port 5562")
 	fmt.Printf("\n     ./subscriber -ip localhost -port 5562\n")
 	fmt.Printf("\n  (2) For subscribing with topic: ")
-	fmt.Printf("\n     ./subscriber -ip 107.108.81.116 -port 5562 -t topic1")
+	fmt.Printf("\n     ./subscriber -ip 0.0.0.0 -port 5562 -t topic1")
 	fmt.Printf("\n     ./subscriber -ip localhost -port 5562 -t topic1\n")
 	os.Exit(-1)
 }
