@@ -309,13 +309,13 @@ func TestSubscribeSecured(t *testing.T) {
 		t.Errorf("\nSubscriber instance is NULL")
 	}
 
-	clientPrivateKey := "ZB1@RS6Kv^zucova$kH(!o>tZCQ.<!Q)6-0aWFmW"
-	clientPublicKey := "-QW?Ved(f:<::3d5tJ$[4Er&]6#9yr=vha/caBc("
+	clientPrivateKey := ""
+	clientPublicKey := ""
 	subResult = subscriber.SetClientKeys([]byte(clientPrivateKey), []byte(clientPublicKey))
 	if subResult != ezmq.EZMQ_OK {
 		t.Errorf("\nError while setting client keys\n")
 	}
-	serverPublicKey := "tXJx&1^QE2g7WCXbF.$$TVP.wCtxwNhR8?iLi&S<"
+	serverPublicKey := ""
 	subResult = subscriber.SetServerPublicKey([]byte(serverPublicKey))
 	if subResult != ezmq.EZMQ_OK {
 		t.Errorf("\nError while setting server key\n")
@@ -486,13 +486,13 @@ func TestSubscribeIPPortSecured(t *testing.T) {
 		t.Errorf("\nSubscriber instance is NULL")
 	}
 
-	clientPrivateKey := "ZB1@RS6Kv^zucova$kH(!o>tZCQ.<!Q)6-0aWFmW"
-	clientPublicKey := "-QW?Ved(f:<::3d5tJ$[4Er&]6#9yr=vha/caBc("
+	clientPrivateKey := ""
+	clientPublicKey := ""
 	subResult = subscriber.SetClientKeys([]byte(clientPrivateKey), []byte(clientPublicKey))
 	if subResult != ezmq.EZMQ_OK {
 		t.Errorf("\nError while setting client keys\n")
 	}
-	serverPublicKey := "tXJx&1^QE2g7WCXbF.$$TVP.wCtxwNhR8?iLi&S<"
+	serverPublicKey := ""
 	subResult = subscriber.SetServerPublicKey([]byte(serverPublicKey))
 	if subResult != ezmq.EZMQ_OK {
 		t.Errorf("\nError while setting server key\n")
