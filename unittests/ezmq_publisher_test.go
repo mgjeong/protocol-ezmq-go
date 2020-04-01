@@ -189,7 +189,8 @@ func TestPublishSecured(t *testing.T) {
 		t.Errorf("\nPublisher instance is NULL")
 	}
 
-	serverSecretKey := "[:X%Q3UfY+kv2A^.wv:(qy2E=bk0L][cm=mS3Hcx"
+	// put server key
+	serverSecretKey := ""
 	pubResult = publisher.SetServerPrivateKey([]byte(serverSecretKey))
 	if pubResult != ezmq.EZMQ_OK {
 		t.Errorf("\nError while setting server private key\n")
