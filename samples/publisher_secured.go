@@ -29,7 +29,8 @@ import (
 	"time"
 )
 
-const ServerSecretKey = "[:X%Q3UfY+kv2A^.wv:(qy2E=bk0L][cm=mS3Hcx"
+// put server key
+const ServerSecretKey = ""
 
 func getEvent() ezmq.Event {
 	var event ezmq.Event

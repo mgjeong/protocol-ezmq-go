@@ -28,9 +28,10 @@ import (
 	"syscall"
 )
 
-const serverPublicKey = "tXJx&1^QE2g7WCXbF.$$TVP.wCtxwNhR8?iLi&S<"
-const clientPrivateKey = "ZB1@RS6Kv^zucova$kH(!o>tZCQ.<!Q)6-0aWFmW"
-const clientPublicKey = "-QW?Ved(f:<::3d5tJ$[4Er&]6#9yr=vha/caBc("
+// put server & client key
+const serverPublicKey = ""
+const clientPrivateKey = ""
+const clientPublicKey = ""
 
 func printEvent(event ezmq.Event) {
 	fmt.Printf("\n--------------------------------------")
